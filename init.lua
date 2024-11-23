@@ -7,7 +7,8 @@ local Plug = vim.fn["plug#"]
 
 vim.call("plug#begin")
 
-Plug("mfussenegger/nvim-jdtls")
+-- Plug("mfussenegger/nvim-jdtls")
+Plug("ThePrimeagen/vim-be-good")
 Plug("tpope/vim-fugitive")
 
 vim.call("plug#end")
