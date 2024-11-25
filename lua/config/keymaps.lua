@@ -23,3 +23,9 @@ vim.keymap.set("n", "N", "Nzzzv")
 -- Yank to clipboard
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
+
+-- Preserve yank after pasting
+vim.keymap.set("x", "<leader>p", [["_dP]])
+
+-- Move between projects
+vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
