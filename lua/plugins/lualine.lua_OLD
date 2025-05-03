@@ -1,0 +1,9 @@
+-- local theme1 = require("lualine.themes.ayu_mirage")
+
+-- require("lualine").setup({
+--   options = {
+--     theme = "ayu_mirage",
+--     transparent = true,
+--     -- ... your lualine config
+--   },
+-- })

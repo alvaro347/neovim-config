@@ -13,8 +13,13 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 vim.keymap.set("n", "J", "mzJ`z")
 
 -- Keep cursor in the middle when jumping half page
-vim.keymap.set("n", "<C-d>", "<C-d>zz")
-vim.keymap.set("n", "<C-u>", "<C-u>zz")
+if vim.fn.has("macunix") then
+  vim.keymap.set("n", "<D-d>", "<C-d>zz")
+  vim.keymap.set("n", "<D-u>", "<C-u>zz")
+else
+  vim.keymap.set("n", "<C-d>", "<C-d>zz")
+  vim.keymap.set("n", "<C-u>", "<C-u>zz")
+end
 
 -- Keep cursor in the middle when searching
 vim.keymap.set("n", "n", "nzzzv")
@@ -29,3 +34,9 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 
 -- Move between projects
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
+
+-- vim.keymap.del("n", "<C-n>")
+-- vim.keymap.set("n", "<C-n>", "Find Under")
+--
+-- vim.api.nvim_set_keymap("v", "<C-n>", "<Plug>(Find Under)", { noremap = false, silent = true })
+vim.keymap.set("v", "<C-n>", "<Plug>(Find Under)", { desc = "Find Under" })
