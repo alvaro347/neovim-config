@@ -17,3 +17,9 @@ vim.opt.smartindent = true
 
 -- Window Scroll
 vim.opt.scrolloff = 8
+
+vim.opt.clipboard = "unnamedplus"
+
+-- LSP (Disagnostics) config
+
+vim.g.snacks_animate = false
