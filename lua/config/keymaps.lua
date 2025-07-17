@@ -4,6 +4,7 @@
 
 -- Sets default file explorer to leader pv
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+vim.keymap.set("n", "<leader>pr", vim.cmd.Rex)
 
 -- Move selected lines up and down with J and K
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
@@ -35,8 +36,5 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 -- Move between projects
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 
--- vim.keymap.del("n", "<C-n>")
--- vim.keymap.set("n", "<C-n>", "Find Under")
---
--- vim.api.nvim_set_keymap("v", "<C-n>", "<Plug>(Find Under)", { noremap = false, silent = true })
-vim.keymap.set("v", "<C-n>", "<Plug>(Find Under)", { desc = "Find Under" })
+-- -- Tabs
+-- vim.keymap.set("n", "<leader>bd", ":bd<CR>", { desc = "Buffer: Close current buffer" })

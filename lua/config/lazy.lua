@@ -24,6 +24,14 @@ require("lazy").setup({
       },
       import = "lazyvim.plugins",
     },
+    {
+      "mason-org/mason-lspconfig.nvim",
+      opts = {},
+      dependencies = {
+        { "mason-org/mason.nvim", opts = {} },
+        "neovim/nvim-lspconfig",
+      },
+    },
     -- import/override with your plugins
     { import = "plugins" },
     { import = "plugins/themes" },
