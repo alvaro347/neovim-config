@@ -33,6 +33,12 @@ vim.keymap.set("n", "<leader>Y", [["+Y]])
 -- Preserve yank after pasting
 vim.keymap.set("x", "<leader>p", [["_dP]])
 
+-- Color picker
+vim.keymap.set("n", "<leader>cp", vim.cmd.CccPick)
+
+-- Rename type / symbol
+vim.keymap.set("n", "<leader>R", vim.lsp.buf.rename, { desc = "LSP Rename" })
+
 -- Move between projects
 vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 
