@@ -44,3 +44,7 @@ vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 
 -- -- Tabs
 -- vim.keymap.set("n", "<leader>bd", ":bd<CR>", { desc = "Buffer: Close current buffer" })
+
+-- Ripgrep for searching inside files
+local opts = { noremap = true, silent = true }
+vim.api.nvim_set_keymap("n", "<leader>fa", ":lua require('fzf-lua').grep()<CR>", opts)
