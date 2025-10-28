@@ -1,5 +1,5 @@
 return {
-  "echasnovski/mini.animate",
+  "nvim-mini/mini.comment",
   opts = {
     cursor = { enable = false },
     scroll = { enable = false },
