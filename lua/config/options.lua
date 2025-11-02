@@ -60,28 +60,39 @@ vim.o.conceallevel = 0
 
 vim.g.snacks_animate = false
 
--- LSP (Disagnostics) config
+-- METHOD 1: Global settroundeding for all floating windows (simplest for Neovim 0.11+)
+vim.o.winborder = "single" -- or use your custom border table
+
+-- LSP (Diagnostics) config
 vim.diagnostic.config({
   -- Use the default configuration
   virtual_lines = false,
-
-  -- Alternatively, customize specific options
-  -- virtual_lines = {
-  --   -- Only show virtual line diagnostics for the current cursor line
-  --   current_line = false,
-  -- },
 })
 
 -- Enable true color
 vim.opt.termguicolors = true
--- After colorscheme, clear floating window backgrounds
+
+-- Clear floating window backgrounds for transparency
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
 vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
 
+-- COMPLETION MENU TRANSPARENCY (this was missing!)
+-- These are the highlight groups for the popup/completion menu
+vim.api.nvim_set_hl(0, "Pmenu", { bg = "NONE" }) -- Popup menu normal item
+vim.api.nvim_set_hl(0, "PmenuSel", { bg = "NONE" }) -- Popup menu selected item (you may want to keep this visible)
+vim.api.nvim_set_hl(0, "PmenuSbar", { bg = "NONE" }) -- Popup menu scrollbar
+vim.api.nvim_set_hl(0, "PmenuThumb", { bg = "NONE" }) -- Popup menu scrollbar thumb
+
+-- Ensure transparency persists after colorscheme changes
 vim.api.nvim_create_autocmd("ColorScheme", {
   pattern = "*",
   callback = function()
+    -- Floating windows
     vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
     vim.api.nvim_set_hl(0, "FloatBorder", { bg = "NONE" })
+
+    -- Completion menu
+    vim.api.nvim_set_hl(0, "Pmenu", { bg = "NONE" })
+    vim.api.nvim_set_hl(0, "PmenuSbar", { bg = "NONE" })
   end,
 })
