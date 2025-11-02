@@ -2,7 +2,7 @@ return {
   {
     "ellisonleao/gruvbox.nvim",
     opts = {
-      terminal_colors = true, -- add neovim terminal colors
+      terminal_colors = true,
       undercurl = true,
       underline = true,
       bold = true,
@@ -18,10 +18,15 @@ return {
       invert_signs = false,
       invert_tabline = false,
       invert_intend_guides = false,
-      inverse = true, -- invert background for search, diffs, statuslines and errors
-      contrast = "soft", -- can be "hard", "soft" or empty string
+      inverse = true,
+      contrast = "soft",
       palette_overrides = {},
-      overrides = {},
+      overrides = {
+        -- Override LSP reference highlighting
+        LspReferenceText = { bg = "#4d4d46" }, -- Slightly darker background
+        LspReferenceRead = { bg = "#3c3836" },
+        LspReferenceWrite = { bg = "#3c3836" },
+      },
       dim_inactive = false,
       transparent_mode = true,
     },
