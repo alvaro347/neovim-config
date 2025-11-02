@@ -40,9 +40,6 @@ return {
       --     vim.api.nvim_set_hl(0, "IncSearch", { bg = "#d65d0e", fg = "#282828" })
       --   end,
       -- })
-      --
-      -- Load the colorscheme
-      vim.cmd.colorscheme("gruvbox-material")
     end,
   },
 }
