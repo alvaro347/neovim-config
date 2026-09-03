@@ -1,0 +1,9 @@
+-- nvim-surround (alternative to vim-surround). Rename to surround.lua to enable.
+local pack = require("config.pack")
+pack.add({ { "kylechui/nvim-surround", version = vim.version.range("*") } }) -- latest release
+
+pack.later(function()
+  require("nvim-surround").setup({
+    -- Configuration here, or leave empty to use defaults
+  })
+end)

@@ -1,0 +1,3 @@
+-- nerdcommenter (alternative to mini.comment). Rename to enable.
+-- local pack = require("config.pack")
+-- pack.add({ "preservim/nerdcommenter" })

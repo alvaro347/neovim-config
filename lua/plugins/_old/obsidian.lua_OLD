@@ -1,0 +1,16 @@
+-- obsidian.nvim, loaded for markdown files. Rename to obsidian.lua to enable (and fix the vault path).
+local pack = require("config.pack")
+pack.lazy({
+  "nvim-lua/plenary.nvim",
+  { "epwalsh/obsidian.nvim", version = vim.version.range("*") }, -- latest release
+}, { ft = "markdown" }, function()
+  require("obsidian").setup({
+    workspaces = {
+      {
+        name = "personal",
+        path = "C:/Users/Alvaro/Documentos/iCloudDrive/iCloud~md~obsidian/ObsidianVault",
+      },
+    },
+    -- see the README for the full list of options
+  })
+end)

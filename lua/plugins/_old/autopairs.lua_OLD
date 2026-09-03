@@ -1,0 +1,7 @@
+-- nvim-autopairs (alternative to mini.pairs). Rename to autopairs.lua to enable.
+local pack = require("config.pack")
+pack.add({ "windwp/nvim-autopairs" })
+
+pack.later(function()
+  require("nvim-autopairs").setup({})
+end)

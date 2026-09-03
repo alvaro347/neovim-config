@@ -1,42 +1,31 @@
-return {
-  {
-    "ThePrimeagen/harpoon",
-    branch = "harpoon2",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = function()
-      local harpoon = require("harpoon")
-      harpoon:setup({}) -- initialize with defaults
+-- harpoon2: quick file marks (<leader>a menu, <leader>A add, <leader>1..5 jump).
+local pack = require("config.pack")
+pack.add({
+  "nvim-lua/plenary.nvim",
+  { "ThePrimeagen/harpoon", version = "harpoon2" },
+})
 
-      -- Helper to simplify key mapping
-      local function map(lhs, rhs, desc)
-        vim.keymap.set("n", lhs, rhs, { desc = desc })
-      end
+local harpoon = require("harpoon")
+harpoon:setup({}) -- initialize with defaults
 
-      -- Add current file to Harpoon list
-      map("<leader>A", function()
-        harpoon:list():add()
-      end, "Harpoon: add file")
+-- Helper to simplify key mapping
+local function map(lhs, rhs, desc)
+  vim.keymap.set("n", lhs, rhs, { desc = desc })
+end
 
-      -- Toggle the quick‐menu
-      map("<leader>a", function()
-        harpoon.ui:toggle_quick_menu(harpoon:list())
-      end, "Harpoon: quick menu")
+-- Add current file to Harpoon list
+map("<leader>A", function()
+  harpoon:list():add()
+end, "Harpoon: add file")
 
-      -- Jump to specific files
-      for i = 1, 5 do
-        map("<leader>" .. i, function()
-          harpoon:list():select(i)
-        end, "Harpoon: go to file " .. i)
-      end
-    end,
-    keys = {
-      { "<leader>A", desc = "Harpoon: add file" },
-      { "<leader>a", desc = "Harpoon: quick menu" },
-      { "<leader>1", desc = "Harpoon: go to file 1" },
-      { "<leader>2", desc = "Harpoon: go to file 2" },
-      { "<leader>3", desc = "Harpoon: go to file 3" },
-      { "<leader>4", desc = "Harpoon: go to file 4" },
-      { "<leader>5", desc = "Harpoon: go to file 5" },
-    },
-  },
-}
+-- Toggle the quick‐menu
+map("<leader>a", function()
+  harpoon.ui:toggle_quick_menu(harpoon:list())
+end, "Harpoon: quick menu")
+
+-- Jump to specific files
+for i = 1, 5 do
+  map("<leader>" .. i, function()
+    harpoon:list():select(i)
+  end, "Harpoon: go to file " .. i)
+end

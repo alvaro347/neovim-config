@@ -1,0 +1,29 @@
+-- nvim-java: extra Java tooling on top of jdtls. Rename to java.lua to enable.
+-- local pack = require("config.pack")
+-- pack.add({ "nvim-java/nvim-java" })
+-- require("java").setup({
+--   -- root_markers = {
+--   --   "settings.gradle",
+--   --   "settings.gradle.kts",
+--   --   "pom.xml",
+--   --   "build.gradle",
+--   --   "mvnw",
+--   --   "gradlew",
+--   --   "build.gradle",
+--   --   "build.gradle.kts",
+--   -- },
+-- })
+-- vim.lsp.config("jdtls", {
+--   -- settings = {
+--   --   java = {
+--   --     configuration = {
+--   --       runtimes = {
+--   --         {
+--   --           name = "JavaSE-23",
+--   --           path = "/usr/local/sdkman/candidates/java/23-tem",
+--   --         },
+--   --       },
+--   --     },
+--   --   },
+--   -- },
+-- })
