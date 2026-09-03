@@ -1,0 +1,15 @@
+-- mini.animate with every animation disabled (the old file pointed at mini.comment by mistake,
+-- so it never did anything). Snacks animations are already off via vim.g.snacks_animate = false.
+-- Rename to minianimate.lua to enable.
+local pack = require("config.pack")
+pack.add({ "nvim-mini/mini.nvim" })
+
+pack.later(function()
+  require("mini.animate").setup({
+    cursor = { enable = false },
+    scroll = { enable = false },
+    resize = { enable = false },
+    open = { enable = false },
+    close = { enable = false },
+  })
+end)

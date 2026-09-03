@@ -1,9 +1,9 @@
+-- lualine is now configured in lua/plugins/lualine.lua (it used to come from LazyVim).
+-- Old notes:
 -- local theme1 = require("lualine.themes.ayu_mirage")
-
 -- require("lualine").setup({
 --   options = {
 --     theme = "ayu_mirage",
 --     transparent = true,
---     -- ... your lualine config
 --   },
 -- })

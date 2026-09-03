@@ -1,0 +1,4 @@
+-- telescope (alternative picker to fzf-lua). Rename to telescope.lua to enable.
+-- local pack = require("config.pack")
+-- pack.add({ "nvim-lua/plenary.nvim", { "nvim-telescope/telescope.nvim", version = "0.1.x" } })
+-- require("telescope").setup({})

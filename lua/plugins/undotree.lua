@@ -1,7 +1,5 @@
-return {
-  "mbbill/undotree",
+-- undotree: visualize the undo history (<leader>u).
+local pack = require("config.pack")
+pack.add({ "mbbill/undotree" })
 
-  config = function()
-    vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
-  end,
-}
+vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle, { desc = "Undotree" })

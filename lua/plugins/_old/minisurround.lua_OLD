@@ -1,0 +1,17 @@
+-- mini.surround (gsa/gsd/gsf/gsF/gsh/gsr/gsn). Alternative to vim-surround. Rename to enable.
+local pack = require("config.pack")
+pack.add({ "nvim-mini/mini.nvim" })
+
+pack.later(function()
+  require("mini.surround").setup({
+    mappings = {
+      add = "gsa", -- Add surrounding in Normal and Visual modes
+      delete = "gsd", -- Delete surrounding
+      find = "gsf", -- Find surrounding (to the right)
+      find_left = "gsF", -- Find surrounding (to the left)
+      highlight = "gsh", -- Highlight surrounding
+      replace = "gsr", -- Replace surrounding
+      update_n_lines = "gsn", -- Update `n_lines`
+    },
+  })
+end)

@@ -1,6 +1,3 @@
-return {
-  {
-    "tpope/vim-surround",
-    event = "VeryLazy", -- Load the plugin lazily (optional)
-  },
-}
+-- vim-surround: ys/cs/ds surroundings.
+local pack = require("config.pack")
+pack.add({ "tpope/vim-surround" })

@@ -1,0 +1,9 @@
+-- fzf-lua is now configured in lua/plugins/fzf.lua (it used to come from LazyVim).
+-- return {
+-- "ibhagwan/fzf-lua",
+-- optional for icon support
+-- dependencies = { "nvim-tree/nvim-web-devicons" },
+-- or if using mini.icons/mini.nvim
+-- dependencies = { "echasnovski/mini.icons" },
+-- opts = {},
+-- }

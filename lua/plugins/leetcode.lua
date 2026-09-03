@@ -1,14 +1,12 @@
-return {
-  {
-    "kawre/leetcode.nvim",
-    build = ":TSUpdate html", -- if you have `nvim-treesitter` installed
-    dependencies = {
-      -- include a picker of your choice, see picker section for more details
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-    },
-    opts = {
-      -- configuration goes here
-    },
-  },
-}
+-- leetcode.nvim: solve leetcode problems inside neovim (`nvim leetcode.nvim`, :Leet).
+-- Needs the html treesitter parser (in plugins/treesitter.lua ensure_installed).
+local pack = require("config.pack")
+pack.add({
+  "nvim-lua/plenary.nvim",
+  "MunifTanjim/nui.nvim",
+  "kawre/leetcode.nvim",
+})
+
+require("leetcode").setup({
+  -- configuration goes here
+})
