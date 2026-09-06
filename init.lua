@@ -23,7 +23,7 @@ pack.setup() -- hooks + :Pack* commands; must run before the first pack.add()
 
 -- Colorschemes first so UI plugins pick up the right highlight groups
 pack.load_dir("plugins/themes")
-if not pcall(vim.cmd.colorscheme, "gruvbox-material") then
+if not pcall(vim.cmd.colorscheme, "zenbones") then
   vim.cmd.colorscheme("habamax")
 end
 
