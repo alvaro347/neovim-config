@@ -41,7 +41,6 @@ local function pretty_path(opts)
     modified_hl = "MatchParen",
     directory_hl = "",
     filename_hl = "Bold",
-    modified_sign = "",
     readonly_icon = " 󰌾 ",
     length = 3,
   }, opts or {})
@@ -68,7 +67,6 @@ local function pretty_path(opts)
     end
 
     if opts.modified_hl and vim.bo.modified then
-      parts[#parts] = parts[#parts] .. opts.modified_sign
       parts[#parts] = format(self, parts[#parts], opts.modified_hl)
     else
       parts[#parts] = format(self, parts[#parts], opts.filename_hl)
@@ -95,7 +93,7 @@ local function root_dir(opts)
     subdirectory = true,
     parent = true,
     other = true,
-    icon = " 󰌾 ",
+    icon = "󱉭 ",
     color = function()
       return { fg = Snacks.util.color("Special") }
     end,
@@ -118,7 +116,7 @@ local function root_dir(opts)
 
   return {
     function()
-      return (opts.icon and opts.icon .. " ") .. get()
+      return (opts.icon or "") .. get()
     end,
     cond = function()
       return type(get()) == "string"
@@ -128,13 +126,14 @@ local function root_dir(opts)
 end
 
 --- Statusline theme derived from the current colorscheme, filled with the cursorline bg.
---- The colorschemes here run with a transparent background (`Normal` has no `bg`, and
---- `options.lua` clears `Pmenu*` too), and lualine's built-in "auto" theme derives every
---- section from exactly those groups — so it falls back to `#000000` and paints a solid
---- black strip. Build the theme here instead: the mode accent keeps the outside blocks,
---- and every other section takes the background of the selected line (`CursorLine`), so
---- the bar reads as one surface in the same tone as the cursorline instead of letting the
---- terminal show through mid-statusline.
+--- lualine's built-in "auto" theme is not enough here: it returns a colorscheme-shipped
+--- lualine theme whenever one exists (zenbones ships one), and otherwise builds its
+--- sections from the `Normal` and `StatusLine` backgrounds — which the transparent themes
+--- here leave unset, so it falls back to `#000000` and paints a solid black strip. Build
+--- the theme instead: the mode accent keeps the outside blocks, and every other section
+--- takes the background of the selected line (`CursorLine`), a group colorschemes fill
+--- even in transparent mode, so the bar reads as one surface in the same tone as the
+--- cursorline instead of letting the terminal show through mid-statusline.
 local function statusline_theme()
   local utils = require("lualine.utils.utils")
   --- First `fg` among `groups`, or `fallback`
@@ -160,49 +159,32 @@ local function statusline_theme()
     return brightness(accent) > 0.5 and block or text
   end
 
-  --- ANSI colour `n` from the theme's terminal palette, if it set one
-  local function ansi(n)
-    local c = vim.g["terminal_color_" .. n]
-    return type(c) == "string" and c:lower() or nil
-  end
-  --- Colours `sources` resolves to: a number is an ANSI index, a string a highlight group
-  local function resolve(sources)
-    local colors = {}
-    for _, src in ipairs(sources) do
-      local color = type(src) == "number" and ansi(src) or fg({ src })
-      if color then
-        colors[#colors + 1] = color:lower()
-      end
-    end
-    return colors
-  end
-
-  -- One accent per mode, first source that resolves to a colour no earlier mode took
-  -- (themes reuse one colour for several groups — gruvbox-material paints both `Function`
-  -- and `String` green, which would make normal and insert indistinguishable).
-  -- `Diagnostic*` comes first: it is the only set carrying five distinct hues in every
-  -- theme here (zenbones paints Function/String/Identifier/Statement the same grey).
-  -- ANSI next, for themes that leave a diagnostic colour at the default; syntax last.
+  -- One accent per mode, first candidate group that resolves to a colour no earlier
+  -- mode already took (themes reuse one colour for several groups — gruvbox-material
+  -- paints both `Function` and `String` green, which would make normal and insert
+  -- indistinguishable)
   local candidates = {
-    { "normal", { "DiagnosticInfo", 4, "Function", "Directory", "Identifier", "Type" } },
-    { "insert", { "DiagnosticOk", 2, "String", "MoreMsg", "Constant" } },
-    { "visual", { "DiagnosticHint", 5, "Special", "Boolean", "Constant", "Type" } },
-    { "replace", { "DiagnosticError", 1, "Number", "Type", "Special" } },
-    { "command", { "DiagnosticWarn", 3, "Statement", "Keyword", "Identifier" } },
+    { "normal", { "Function", "Directory", "Identifier", "Type" } },
+    { "insert", { "String", "MoreMsg", "Constant" } },
+    { "visual", { "Special", "Boolean", "Constant", "Type" } },
+    { "replace", { "Number", "Type", "Special" } },
+    { "command", { "Statement", "Keyword", "Identifier" } },
   }
   local accents, taken = {}, {}
   for _, entry in ipairs(candidates) do
-    local colors = resolve(entry[2])
-    local accent = colors[1]
-    for _, color in ipairs(colors) do
-      if not taken[color] then
+    local mode, groups = entry[1], entry[2]
+    local accent, first
+    for _, group in ipairs(groups) do
+      local color = fg({ group })
+      first = first or color
+      if color and not taken[color] then
         accent = color
         break
       end
     end
-    accent = accent or text
+    accent = accent or first or text
     taken[accent] = true
-    accents[entry[1]] = accent
+    accents[mode] = accent
   end
   accents.terminal = accents.insert
 
@@ -227,7 +209,7 @@ local opts = {
     -- a function, so lualine re-derives it on every `:colorscheme`
     theme = statusline_theme,
     globalstatus = vim.o.laststatus == 3,
-    disabled_filetypes = { statusline = { "dashboard", "alpha", "ministarter", "snacks_dashboard" } },
+    disabled_filetypes = { statusline = { "snacks_dashboard" } },
   },
   sections = {
     lualine_a = { "mode" },
@@ -308,7 +290,7 @@ pack.later(function()
     hl_group = "lualine_c_normal",
   })
   table.insert(opts.sections.lualine_c, {
-    symbols and symbols.get,
+    symbols.get,
     cond = function()
       return vim.b.trouble_lualine ~= false and symbols.has()
     end,
