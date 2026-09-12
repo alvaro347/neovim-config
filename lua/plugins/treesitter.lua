@@ -7,6 +7,7 @@ pack.add({ { "nvim-treesitter/nvim-treesitter", version = "main" } })
 local ensure_installed = {
   "bash",
   "c",
+  "css",
   "diff",
   "html",
   "javascript",
@@ -22,6 +23,7 @@ local ensure_installed = {
   "python",
   "query",
   "regex",
+  "scss",
   "toml",
   "tsx",
   "typescript",
@@ -50,7 +52,13 @@ vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("user_treesitter", { clear = true }),
   callback = function(ev)
     local lang = vim.treesitter.language.get_lang(ev.match)
-    if not lang or not pcall(vim.treesitter.language.add, lang) then
+    if not lang then
+      return
+    end
+    -- language.add() *returns* nil + message when the parser is missing, it does not raise,
+    -- so pcall() alone is not a guard: check the return value or query.get() below throws.
+    local ok, added = pcall(vim.treesitter.language.add, lang)
+    if not ok or not added then
       return
     end
     local function query(name)
