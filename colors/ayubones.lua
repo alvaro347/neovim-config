@@ -20,7 +20,7 @@ local palette = util.palette_extend({
   bg = hsluv("#1a1a1a"), -- neutral gray
   bg_stark = hsluv("#101010"), -- ayu bg #0b0e14, neutralized
   bg_warm = hsluv("#222222"), -- mirage bg #1f2430, neutralized
-  fg = hsluv("#bfbdb6"),
+  fg = hsluv(75, 18, 86), -- ayu fg #bfbdb6 is (75, 7, 77); warmed and lifted like the official palettes
   rose = hsluv("#f07178"), -- markup
   leaf = hsluv("#aad94c"), -- string
   wood = hsluv("#ff8f40"), -- keyword (also ayu's warning color)
@@ -46,13 +46,25 @@ local base_specs = generator.generate(palette, bg, config)
 -- Optionally extend specs using Lush. zenbones keeps syntax monochrome (bold statements,
 -- italic strings, dimmed identifiers, gray types/delimiters); like the official variants,
 -- only a handful of legacy groups get an accent. Treesitter and LSP captures chain off these.
-local specs = lush.extends({ base_specs }).with(function()
+local specs = lush.extends({ base_specs }).with(function(injected)
+  local sym = injected.sym
   return {
     Statement({ base_specs.Statement, fg = palette.wood }), -- orange keywords, bold
     Function({ fg = palette.gold }), -- ayu's gold functions
     Type({ fg = palette.water }), -- entity blue
     Number({ fg = palette.blossom }), -- purple constants
     Special({ fg = palette.sky1 }), -- teal regexp, escapes, builtins, tags
+    sym("@markup.raw")({ fg = palette.gold }), -- inline code and code blocks (ayu uses its tan `special`; gold is the nearest palette color); @markup.raw.block follows
+    sym("@markup.raw.markdown")({ fg = palette.gold }),
+    markdownCode({ fg = palette.gold }),
+    -- Diagnostics and spelling never recolor the text: underline/strikethrough only (zenbones
+    -- paints misspelled words rose and unused code yellow)
+    SpellBad({ gui = "undercurl", sp = palette.rose }),
+    SpellCap({ gui = "undercurl", sp = palette.rose.da(10) }),
+    SpellLocal({ gui = "undercurl", sp = palette.rose.da(10) }),
+    SpellRare({ gui = "undercurl", sp = palette.wood }),
+    DiagnosticUnnecessary({ base_specs.Comment }),
+    DiagnosticDeprecated({ gui = "strikethrough", sp = palette.wood }),
   }
 end)
 

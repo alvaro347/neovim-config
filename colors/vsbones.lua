@@ -20,7 +20,7 @@ local palette = util.palette_extend({
   bg = hsluv("#191a1b"), -- sideBar / statusBar / panel.background
   bg_stark = hsluv("#121314"), -- editor.background
   bg_warm = hsluv("#202122"), -- editorWidget.background
-  fg = hsluv("#bbbebf"), -- editor.foreground
+  fg = hsluv(230, 6, 84), -- editor.foreground #bbbebf lifted from L77 to L84, faintly cool, near neutral
   rose = hsluv("#ff7b72"), -- keyword / storage
   leaf = hsluv("#7ee787"), -- entity.name.tag / regexp
   wood = hsluv("#ffa657"), -- variable / parameter
@@ -45,13 +45,25 @@ local base_specs = generator.generate(palette, bg, config)
 -- italic strings, dimmed identifiers, gray types/delimiters); like the official variants,
 -- only a handful of legacy groups get an accent. Treesitter and LSP captures chain off these:
 -- PreProc and @operator inherit Statement, which gives dark2026's red import/return/operators.
-local specs = lush.extends({ base_specs }).with(function()
+local specs = lush.extends({ base_specs }).with(function(injected)
+  local sym = injected.sym
   return {
     Statement({ base_specs.Statement, fg = palette.rose }), -- red keywords, bold
     Function({ fg = palette.blossom }), -- purple functions
     Type({ fg = palette.sky }), -- teal types
     Number({ fg = palette.water }), -- blue numbers
     Special({ fg = palette.leaf }), -- green tags, regexp, escapes, builtins
+    sym("@markup.raw")({ fg = palette.water }), -- inline code and code blocks (dark2026 uses the string/constant blue); @markup.raw.block follows
+    sym("@markup.raw.markdown")({ fg = palette.water }),
+    markdownCode({ fg = palette.water }),
+    -- Diagnostics and spelling never recolor the text: underline/strikethrough only (zenbones
+    -- paints misspelled words rose and unused code yellow)
+    SpellBad({ gui = "undercurl", sp = palette.rose }),
+    SpellCap({ gui = "undercurl", sp = palette.rose.da(10) }),
+    SpellLocal({ gui = "undercurl", sp = palette.rose.da(10) }),
+    SpellRare({ gui = "undercurl", sp = palette.wood }),
+    DiagnosticUnnecessary({ base_specs.Comment }),
+    DiagnosticDeprecated({ gui = "strikethrough", sp = palette.wood }),
   }
 end)
 

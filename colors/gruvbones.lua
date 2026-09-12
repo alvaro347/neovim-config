@@ -55,11 +55,23 @@ local base_specs = generator.generate(palette, bg, config)
 -- Optionally extend specs using Lush: the three accents from the zenbones docs. Everything
 -- else keeps the zenbones hierarchy (bold statements, italic strings, dimmed identifiers,
 -- gray delimiters); treesitter and LSP captures chain off these legacy groups.
-local specs = lush.extends({ base_specs }).with(function()
+local specs = lush.extends({ base_specs }).with(function(injected)
+  local sym = injected.sym
   return {
     Statement({ base_specs.Statement, fg = palette.rose }),
     Special({ fg = palette.water }),
     Type({ fg = palette.sky, gui = "italic" }),
+    sym("@markup.raw")({ fg = palette.leaf }), -- inline code and code blocks (gruvbox.nvim uses the string green); @markup.raw.block follows
+    sym("@markup.raw.markdown")({ fg = palette.leaf }),
+    markdownCode({ fg = palette.leaf }),
+    -- Diagnostics and spelling never recolor the text: underline/strikethrough only (zenbones
+    -- paints misspelled words rose and unused code yellow)
+    SpellBad({ gui = "undercurl", sp = palette.rose }),
+    SpellCap({ gui = "undercurl", sp = palette.rose.da(10) }),
+    SpellLocal({ gui = "undercurl", sp = palette.rose.da(10) }),
+    SpellRare({ gui = "undercurl", sp = palette.wood }),
+    DiagnosticUnnecessary({ base_specs.Comment }),
+    DiagnosticDeprecated({ gui = "strikethrough", sp = palette.wood }),
   }
 end)
 
