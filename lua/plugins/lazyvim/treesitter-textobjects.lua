@@ -16,11 +16,13 @@ pack.later(function()
   local function attach(buf)
     local ft = vim.bo[buf].filetype
     local lang = vim.treesitter.language.get_lang(ft)
-    if
-      not lang
-      or not pcall(vim.treesitter.language.add, lang)
-      or not vim.treesitter.query.get(lang, "textobjects")
-    then
+    if not lang then
+      return
+    end
+    -- language.add() *returns* nil + message when the parser is missing, it does not raise,
+    -- so pcall() alone is not a guard: check the return value or query.get() below throws.
+    local ok, added = pcall(vim.treesitter.language.add, lang)
+    if not ok or not added or not vim.treesitter.query.get(lang, "textobjects") then
       return
     end
     for method, keys in pairs(moves) do
