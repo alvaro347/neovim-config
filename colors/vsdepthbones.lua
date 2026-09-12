@@ -16,7 +16,7 @@ local palette = util.palette_extend({
   bg = hsluv("#202122"), -- editorWidget.background
   bg_stark = hsluv("#191a1b"), -- sideBar / statusBar / panel.background
   bg_warm = hsluv("#242526"), -- editor.lineHighlightBackground
-  fg = hsluv("#bbbebf"), -- editor.foreground
+  fg = hsluv(230, 6, 84), -- editor.foreground #bbbebf lifted from L77 to L84, faintly cool, near neutral
   rose = hsluv("#ff7b72"), -- keyword / storage
   leaf = hsluv("#7ee787"), -- entity.name.tag / regexp
   wood = hsluv("#ffa657"), -- variable / parameter
@@ -41,13 +41,25 @@ local base_specs = generator.generate(palette, bg, config)
 
 -- Optionally extend specs using Lush. Same five accents as vscbones; see that file for how
 -- the storage/control keyword split maps onto zenbones' Statement/Keyword groups.
-local specs = lush.extends({ base_specs }).with(function()
+local specs = lush.extends({ base_specs }).with(function(injected)
+  local sym = injected.sym
   return {
     Statement({ base_specs.Statement, fg = palette.control }), -- purple control flow, bold
     Keyword({ fg = palette.rose, gui = "bold" }), -- red storage keywords (local, let, const, class, static)
     Function({ fg = palette.blossom }), -- purple functions
     Type({ fg = palette.sky }), -- teal types
     Number({ fg = palette.numeric }), -- green numbers
+    sym("@markup.raw")({ fg = palette.water }), -- inline code and code blocks (VSCode 2026 markup.inline.raw is #79c0ff); @markup.raw.block follows
+    sym("@markup.raw.markdown")({ fg = palette.water }),
+    markdownCode({ fg = palette.water }),
+    -- Diagnostics and spelling never recolor the text: underline/strikethrough only (zenbones
+    -- paints misspelled words rose and unused code yellow)
+    SpellBad({ gui = "undercurl", sp = palette.rose }),
+    SpellCap({ gui = "undercurl", sp = palette.rose.da(10) }),
+    SpellLocal({ gui = "undercurl", sp = palette.rose.da(10) }),
+    SpellRare({ gui = "undercurl", sp = palette.wood }),
+    DiagnosticUnnecessary({ base_specs.Comment }),
+    DiagnosticDeprecated({ gui = "strikethrough", sp = palette.wood }),
   }
 end)
 
