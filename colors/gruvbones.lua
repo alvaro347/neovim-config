@@ -64,6 +64,7 @@ local specs = lush.extends({ base_specs }).with(function(injected)
     sym("@markup.raw")({ fg = palette.leaf }), -- inline code and code blocks (gruvbox.nvim uses the string green); @markup.raw.block follows
     sym("@markup.raw.markdown")({ fg = palette.leaf }),
     markdownCode({ fg = palette.leaf }),
+    MatchParen({ bg = base_specs.Visual.bg, gui = "bold" }), -- neutral pair highlight; zenbones links it to the blossom-tinted Search
     -- Diagnostics and spelling never recolor the text: underline/strikethrough only (zenbones
     -- paints misspelled words rose and unused code yellow)
     SpellBad({ gui = "undercurl", sp = palette.rose }),

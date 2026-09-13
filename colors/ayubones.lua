@@ -57,6 +57,7 @@ local specs = lush.extends({ base_specs }).with(function(injected)
     sym("@markup.raw")({ fg = palette.gold }), -- inline code and code blocks (ayu uses its tan `special`; gold is the nearest palette color); @markup.raw.block follows
     sym("@markup.raw.markdown")({ fg = palette.gold }),
     markdownCode({ fg = palette.gold }),
+    MatchParen({ bg = base_specs.Visual.bg, gui = "bold" }), -- neutral pair highlight; zenbones links it to the blossom-tinted Search
     -- Diagnostics and spelling never recolor the text: underline/strikethrough only (zenbones
     -- paints misspelled words rose and unused code yellow)
     SpellBad({ gui = "undercurl", sp = palette.rose }),
