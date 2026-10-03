@@ -34,6 +34,9 @@ require("blink.cmp").setup({
     ghost_text = { enabled = true },
   },
 
+  -- auto signature help while typing arguments (noice used to provide it)
+  signature = { enabled = true },
+
   sources = {
     default = { "lsp", "path", "snippets", "buffer" },
     -- the "lazydev" source for lua files is added by lua/plugins/lazyvim/lazydev.lua

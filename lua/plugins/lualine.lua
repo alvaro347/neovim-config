@@ -193,7 +193,7 @@ local function statusline_theme()
     theme[mode] = {
       a = { bg = accent, fg = on_accent(accent), gui = "bold" }, -- mode / the clock
       b = { bg = block, fg = accent }, -- branch / progress + location
-      c = { bg = block, fg = text }, -- the fill: path, diagnostics, diff, noice
+      c = { bg = block, fg = text }, -- the fill: path, diagnostics, diff
     }
   end
   theme.inactive = {
@@ -231,18 +231,6 @@ local opts = {
     },
     lualine_x = {
       Snacks.profiler.status(),
-      -- stylua: ignore
-      {
-        function() return require("noice").api.status.command.get() end,
-        cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
-        color = function() return { fg = Snacks.util.color("Statement") } end,
-      },
-      -- stylua: ignore
-      {
-        function() return require("noice").api.status.mode.get() end,
-        cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
-        color = function() return { fg = Snacks.util.color("Constant") } end,
-      },
       {
         "diff",
         symbols = {
