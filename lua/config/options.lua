@@ -79,12 +79,13 @@ opt.wrap = false -- Disable line wrap
 -- Font
 vim.opt.guifont = "MesloLGM Nerd Font"
 
--- Tabs and indentation
+-- Tabs and indentation: the source of truth for indent per filetype. conform passes these to
+-- stylua; a repo can override them with an .editorconfig (Neovim applies it natively).
 local indent = vim.api.nvim_create_augroup("FileTypeIndent", { clear = true })
 
 vim.api.nvim_create_autocmd("FileType", {
   group = indent,
-  pattern = { "javascript", "typescript", "jsx", "tsx", "html", "css", "json", "yaml" },
+  pattern = { "javascript", "typescript", "jsx", "tsx", "html", "css", "json", "yaml", "lua" },
   callback = function()
     vim.bo.expandtab = true
     vim.bo.tabstop = 2
@@ -95,7 +96,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 vim.api.nvim_create_autocmd("FileType", {
   group = indent,
-  pattern = { "python", "lua", "xml", "markdown" },
+  pattern = { "python", "xml", "markdown" },
   callback = function()
     vim.bo.expandtab = true
     vim.bo.tabstop = 4
