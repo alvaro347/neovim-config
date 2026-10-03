@@ -7,7 +7,7 @@
 --   lua/config/pack.lua         small helper around vim.pack (see the file header)
 --   lua/plugins/*.lua           one file per plugin
 --   lua/plugins/lazyvim/*.lua   plugins inherited from LazyVim, still to be reviewed
---   lua/plugins/themes/*.lua    colorschemes (only gruvbox-material is applied below)
+--   lua/plugins/themes/*.lua    colorschemes (zenbones is applied below)
 --   lua/plugins/_old/*.lua_OLD  disabled plugins (not loaded)
 --
 -- Manage plugins with :PackUpdate, :PackStatus and :PackClean.
