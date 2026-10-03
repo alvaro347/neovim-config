@@ -36,11 +36,11 @@ map("v", "<leader>cis", "<cmd>ClaudeCodeSend<cr>", { desc = "Send to Claude" })
 map("n", "<leader>cia", "<cmd>ClaudeCodeDiffAccept<cr>", { desc = "Accept diff" })
 map("n", "<leader>cid", "<cmd>ClaudeCodeDiffDeny<cr>", { desc = "Deny diff" })
 
--- In file explorers <leader>ci adds the file under the cursor
+-- In file explorers <leader>cI adds the file under the cursor (<leader>ci* is the diff group)
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("user_claudecode_tree", { clear = true }),
   pattern = { "NvimTree", "neo-tree", "oil", "minifiles" },
   callback = function(ev)
-    vim.keymap.set("n", "<leader>ci", "<cmd>ClaudeCodeTreeAdd<cr>", { buffer = ev.buf, desc = "Add file" })
+    vim.keymap.set("n", "<leader>cI", "<cmd>ClaudeCodeTreeAdd<cr>", { buf = ev.buf, desc = "Add file" })
   end,
 })

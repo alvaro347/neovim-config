@@ -78,7 +78,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- stylua: ignore start
     map("<leader>cl", function() Snacks.picker.lsp_config() end, "Lsp Info")
     map("gd", "<cmd>FzfLua lsp_definitions     jump1=true ignore_current_line=true<cr>", "Goto Definition")
-    map("gr", "<cmd>FzfLua lsp_references      jump1=true ignore_current_line=true<cr>", "References", "n", { nowait = true })
+    map("grr", "<cmd>FzfLua lsp_references     jump1=true ignore_current_line=true<cr>", "References")
     map("gI", "<cmd>FzfLua lsp_implementations jump1=true ignore_current_line=true<cr>", "Goto Implementation")
     map("gy", "<cmd>FzfLua lsp_typedefs        jump1=true ignore_current_line=true<cr>", "Goto T[y]pe Definition")
     map("gD", vim.lsp.buf.declaration, "Goto Declaration")
