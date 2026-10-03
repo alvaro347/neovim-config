@@ -1,3 +1,5 @@
+vim.loader.enable() -- bytecode cache for Lua modules (lazy.nvim used to enable it)
+
 -- Neovim >= 0.12 configuration using the built-in plugin manager (:h vim.pack).
 --
 -- Layout
@@ -28,8 +30,8 @@ if not pcall(vim.cmd.colorscheme, "zenbones") then
 end
 
 -- snacks.nvim first: it defines the global `Snacks` used by other plugin files
-pcall(require, "plugins.snacks")
-pcall(require, "plugins.miniicons") -- provides icons (and a nvim-web-devicons shim) for the plugins below
+require("plugins.snacks")
+require("plugins.miniicons") -- provides icons (and a nvim-web-devicons shim) for the plugins below
 pack.load_dir("plugins")
 pack.load_dir("plugins/lazyvim")
 
