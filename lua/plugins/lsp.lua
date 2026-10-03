@@ -71,7 +71,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
         mode or "n",
         lhs,
         rhs,
-        vim.tbl_extend("force", { buffer = buf, desc = desc, silent = true }, extra or {})
+        vim.tbl_extend("force", { buf = buf, desc = desc, silent = true }, extra or {})
       )
     end
 
