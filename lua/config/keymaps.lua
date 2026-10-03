@@ -189,8 +189,6 @@ map("n", "<leader>cp", vim.cmd.CccPick, { desc = "Color Picker" })
 -- Rename type / symbol
 map("n", "<leader>R", vim.lsp.buf.rename, { desc = "LSP Rename" })
 
--- Move between projects
-map("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 
 -- -- Tabs
 -- map("n", "<leader>bd", ":bd<CR>", { desc = "Buffer: Close current buffer" })
