@@ -33,10 +33,6 @@
       "rev": "3fc6ca199a3537b46e49dbe5eed669fe9ff0d63e",
       "src": "https://github.com/D0nw0r/dark2026.nvim"
     },
-    "dressing.nvim": {
-      "rev": "2d7c2db2507fa3c4956142ee607431ddb2828639",
-      "src": "https://github.com/stevearc/dressing.nvim"
-    },
     "everforest-nvim": {
       "rev": "a0e9edc57379e8feafc6ba207c26dbb12fc1b6d8",
       "src": "https://github.com/neanias/everforest-nvim"
