@@ -36,7 +36,7 @@ pack.later(function()
             return vim.cmd("normal! " .. lhs)
           end
           require("nvim-treesitter-textobjects.move")[method](query, "textobjects")
-        end, { buffer = buf, desc = desc, silent = true })
+        end, { buf = buf, desc = desc, silent = true })
       end
     end
   end
