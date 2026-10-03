@@ -27,6 +27,18 @@ require("conform").setup({
   -- You can also define any custom formatters here.
   formatters = {
     injected = { options = { ignore_errors = true } },
+    -- Indentation comes from the buffer (options.lua, or a repo's .editorconfig), so typing and
+    -- formatting always agree. A repo's own stylua.toml still wins: no overrides are passed then.
+    stylua = {
+      prepend_args = function(_, ctx)
+        if vim.fs.root(ctx.dirname, { "stylua.toml", ".stylua.toml" }) then
+          return {}
+        end
+        local bo = vim.bo[ctx.buf]
+        local width = bo.shiftwidth > 0 and bo.shiftwidth or bo.tabstop
+        return { "--indent-type", bo.expandtab and "Spaces" or "Tabs", "--indent-width", tostring(width) }
+      end,
+    },
     -- # Example of using shfmt with extra args
     -- shfmt = {
     --   prepend_args = { "-i", "2", "-ci" },
