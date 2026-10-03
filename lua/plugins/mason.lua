@@ -6,7 +6,7 @@ pack.add({ "mason-org/mason.nvim", "mason-org/mason-lspconfig.nvim", "neovim/nvi
 require("mason").setup()
 
 require("mason-lspconfig").setup({
-  ensure_installed = {},
+  ensure_installed = { "cssls", "jdtls", "lua_ls", "protols", "pyright", "ts_ls", "yamlls" },
   -- enable every installed server, except tools that only masquerade as one
   automatic_enable = {
     exclude = { "stylua" }, -- stylua is a formatter (used by conform), not an LSP
@@ -15,8 +15,9 @@ require("mason-lspconfig").setup({
 
 vim.keymap.set("n", "<leader>cm", "<cmd>Mason<cr>", { desc = "Mason" })
 
--- Non-LSP tools that should always be installed (used by conform.nvim)
-local ensure_installed = { "stylua", "shfmt" }
+-- Non-LSP tools that should always be installed (formatters for conform.nvim; tree-sitter-cli
+-- builds parsers for nvim-treesitter's main branch)
+local ensure_installed = { "stylua", "shfmt", "tree-sitter-cli" }
 pack.later(function()
   local mr = require("mason-registry")
   mr.refresh(function()
