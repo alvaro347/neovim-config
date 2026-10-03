@@ -78,7 +78,8 @@ map("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Keywordprg" })
 map("x", "<", "<gv")
 map("x", ">", ">gv")
 
--- commenting
+-- commenting (native gc/gcc; ts-comments supplies commentstrings for embedded languages)
+map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment Line" })
 map("n", "gco", "o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Below" })
 map("n", "gcO", "O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Above" })
 
