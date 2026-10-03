@@ -122,10 +122,6 @@
       "rev": "2a6940af80375532e5e9e7c1f2fc6319a1b7a69d",
       "src": "https://github.com/mason-org/mason.nvim"
     },
-    "matugen.nvim": {
-      "rev": "14e4585b12ec1ff095319d01794b655f629fa677",
-      "src": "https://github.com/Senal-D-A-Gunaratna/matugen.nvim"
-    },
     "mellow.nvim": {
       "rev": "6273b7f0ddf6ac2b75021b3bc0bd8b3305cfeef1",
       "src": "https://github.com/mellow-theme/mellow.nvim"

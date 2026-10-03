@@ -1,4 +1,4 @@
--- gruvbox-material: the active colorscheme (applied in init.lua after all themes are registered).
+-- gruvbox-material: colorscheme option (init.lua applies zenbones; switch with :colorscheme).
 -- Options are vim.g.* variables, so they must be set before :colorscheme runs.
 local pack = require("config.pack")
 pack.add({ "sainnhe/gruvbox-material" })
