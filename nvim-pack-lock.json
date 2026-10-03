@@ -150,10 +150,6 @@
       "rev": "04b808e9769ded988089772ffcaf08d92d75d927",
       "src": "https://github.com/aktersnurra/no-clown-fiesta.nvim"
     },
-    "noice.nvim": {
-      "rev": "7bfd942445fb63089b59f97ca487d605e715f155",
-      "src": "https://github.com/folke/noice.nvim"
-    },
     "nui.nvim": {
       "rev": "10fc361835c856ba4233ef5ea135b919bf3dce97",
       "src": "https://github.com/MunifTanjim/nui.nvim"
