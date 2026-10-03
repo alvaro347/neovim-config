@@ -1,7 +1,9 @@
-vim.pack.add({
-  "https://github.com/nvim-lua/plenary.nvim",
-  "https://github.com/stevearc/dressing.nvim", -- optional for vim.ui.select
-  "https://github.com/nvim-flutter/flutter-tools.nvim",
-})
-
-require("flutter-tools").setup({})
+-- flutter-tools: Flutter/Dart tooling, loaded on the first dart buffer (the dart/flutter SDKs
+-- are not installed everywhere). vim.ui.select/input come from fzf-lua and snacks.
+local pack = require("config.pack")
+pack.add({ "nvim-lua/plenary.nvim" })
+pack.lazy({ "nvim-flutter/flutter-tools.nvim" }, { ft = "dart" }, function()
+  require("flutter-tools").setup({})
+  -- flutter-tools starts on BufEnter, which already fired for the buffer that triggered the load
+  vim.api.nvim_exec_autocmds("BufEnter", { group = "FlutterToolsGroup", buffer = vim.api.nvim_get_current_buf() })
+end)
