@@ -1,32 +1,13 @@
 -- gruvbox.nvim (:colorscheme gruvbox)
 local pack = require("config.pack")
-pack.add({ "ellisonleao/gruvbox.nvim" })
-
-require("gruvbox").setup({
-  terminal_colors = true,
-  undercurl = true,
-  underline = true,
-  bold = true,
-  italic = {
-    strings = true,
-    emphasis = true,
-    comments = true,
-    operators = false,
-    folds = true,
-  },
-  strikethrough = true,
-  invert_selection = false,
-  invert_signs = false,
-  invert_tabline = false,
-  inverse = true,
-  contrast = "soft",
-  palette_overrides = {},
-  overrides = {
-    -- Override LSP reference highlighting
-    LspReferenceText = { bg = "#4d4d46" }, -- Slightly darker background
-    LspReferenceRead = { bg = "#3c3836" },
-    LspReferenceWrite = { bg = "#3c3836" },
-  },
-  dim_inactive = false,
-  transparent_mode = true,
-})
+pack.lazy({ "ellisonleao/gruvbox.nvim" }, {}, function()
+  require("gruvbox").setup({
+    contrast = "soft",
+    transparent_mode = true,
+    overrides = {
+      LspReferenceText = { bg = "#4d4d46" }, -- subtler LSP reference highlighting
+      LspReferenceRead = { bg = "#3c3836" },
+      LspReferenceWrite = { bg = "#3c3836" },
+    },
+  })
+end)

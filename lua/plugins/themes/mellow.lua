@@ -1,2 +1,3 @@
+-- mellow (:colorscheme mellow)
 local pack = require("config.pack")
-pack.add({ "mellow-theme/mellow.nvim" })
+pack.lazy({ "mellow-theme/mellow.nvim" }, {})

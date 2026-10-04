@@ -1,6 +1,5 @@
+-- luna (:colorscheme luna)
 local pack = require("config.pack")
-pack.add({ "wtfox/luna.nvim" })
-
-require("luna").setup({
-  transparent = true,
-})
+pack.lazy({ "wtfox/luna.nvim" }, {}, function()
+  require("luna").setup({ transparent = true })
+end)

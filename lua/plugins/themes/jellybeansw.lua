@@ -1,6 +1,5 @@
+-- jellybeans.nvim (:colorscheme jellybeans / jellybeans-muted / jellybeans-warm / jellybeans-hc ...)
 local pack = require("config.pack")
-pack.add({ "rktjmp/lush.nvim", "wtfox/jellybeans.nvim" })
-
-require("jellybeans").setup({
-  transparent = true,
-})
+pack.lazy({ "wtfox/jellybeans.nvim" }, {}, function()
+  require("jellybeans").setup({ transparent = true })
+end)
