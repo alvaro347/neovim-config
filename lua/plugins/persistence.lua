@@ -3,7 +3,7 @@ local pack = require("config.pack")
 pack.add({ "folke/persistence.nvim" })
 
 pack.later(function()
-  require("persistence").setup({})
+  require("persistence").setup()
 end)
 
 local map = vim.keymap.set

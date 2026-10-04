@@ -6,57 +6,43 @@ pack.add({ "ibhagwan/fzf-lua" })
 local util = require("config.util")
 local pick = util.pick
 
--- LSP symbol kinds shown by <leader>ss / <leader>sS (LazyVim's kind_filter)
+-- LSP symbol kinds shown by <leader>ss / <leader>sS; false shows every kind
+local kinds = {
+  "Class",
+  "Constructor",
+  "Enum",
+  "Field",
+  "Function",
+  "Interface",
+  "Method",
+  "Module",
+  "Namespace",
+  "Package",
+  "Property",
+  "Struct",
+  "Trait",
+}
 local kind_filter = {
-  default = {
-    "Class",
-    "Constructor",
-    "Enum",
-    "Field",
-    "Function",
-    "Interface",
-    "Method",
-    "Module",
-    "Namespace",
-    "Package",
-    "Property",
-    "Struct",
-    "Trait",
-  },
   markdown = false,
   help = false,
-  lua = {
-    "Class",
-    "Constructor",
-    "Enum",
-    "Field",
-    "Function",
-    "Interface",
-    "Method",
-    "Module",
-    "Namespace",
-    "Property",
-    "Struct",
-    "Trait",
-  },
+  -- lua_ls uses Package for control flow structures
+  lua = vim.tbl_filter(function(k)
+    return k ~= "Package"
+  end, kinds),
 }
 local function symbols_filter(entry, ctx)
   if ctx.symbols_filter == nil then
-    local ft = vim.bo[ctx.bufnr].filetype
-    local f = kind_filter[ft]
-    ctx.symbols_filter = (f == nil and kind_filter.default) or f
+    local f = kind_filter[vim.bo[ctx.bufnr].filetype]
+    ctx.symbols_filter = f == nil and kinds or f
   end
-  if ctx.symbols_filter == false then
-    return true
-  end
-  return vim.tbl_contains(ctx.symbols_filter, entry.kind)
+  return ctx.symbols_filter == false or vim.tbl_contains(ctx.symbols_filter, entry.kind)
 end
 
 local fzf = require("fzf-lua")
 local config = fzf.config
 local actions = fzf.actions
 
--- Quickfix
+-- <c-q> all to quickfix, <c-u>/<c-d> half page, <c-x> jump labels, <c-f>/<c-b> scroll the preview
 config.defaults.keymap.fzf["ctrl-q"] = "select-all+accept"
 config.defaults.keymap.fzf["ctrl-u"] = "half-page-up"
 config.defaults.keymap.fzf["ctrl-d"] = "half-page-down"
@@ -66,12 +52,12 @@ config.defaults.keymap.fzf["ctrl-b"] = "preview-page-up"
 config.defaults.keymap.builtin["<c-f>"] = "preview-page-down"
 config.defaults.keymap.builtin["<c-b>"] = "preview-page-up"
 
--- Trouble: <c-t> sends the results to a trouble list (needs trouble.lua loaded and set up first)
+-- <c-t> sends the results to a Trouble list (needs trouble.lua loaded and set up first)
 if pcall(require, "plugins.trouble") then
   config.defaults.actions.files["ctrl-t"] = require("trouble.sources.fzf").actions.open
 end
 
--- Toggle root dir / cwd
+-- <c-r> / <a-c> toggle between the project root and the cwd
 config.defaults.actions.files["ctrl-r"] = function(_, ctx)
   local o = vim.deepcopy(ctx.__call_opts)
   o.root = o.root == false
@@ -82,93 +68,39 @@ end
 config.defaults.actions.files["alt-c"] = config.defaults.actions.files["ctrl-r"]
 config.set_action_helpstr(config.defaults.actions.files["ctrl-r"], "toggle-root-dir")
 
-local img_previewer ---@type string[]?
-for _, v in ipairs({
-  { cmd = "ueberzug", args = {} },
-  { cmd = "chafa", args = { "{file}", "--format=symbols" } },
-  { cmd = "viu", args = { "-b" } },
-}) do
-  if vim.fn.executable(v.cmd) == 1 then
-    img_previewer = vim.list_extend({ v.cmd }, v.args)
-    break
-  end
-end
-
--- vim.ui.select sizing
+-- vim.ui.select: prompt as the title, sized to the items; code actions get a diff preview below
 local function ui_select(fzf_opts, items)
   return vim.tbl_deep_extend("force", fzf_opts, {
     prompt = " ",
-    winopts = {
-      title = " " .. vim.trim((fzf_opts.prompt or "Select"):gsub("%s*:%s*$", "")) .. " ",
-      title_pos = "center",
-    },
+    winopts = { title = " " .. vim.trim((fzf_opts.prompt or "Select"):gsub("%s*:%s*$", "")) .. " " },
   }, fzf_opts.kind == "codeaction" and {
     winopts = {
-      layout = "vertical",
-      -- height is number of items minus 15 lines for the preview, with a max of 80% screen height
+      -- items plus 15 lines of preview, at most 80% of the screen
       height = math.floor(math.min(vim.o.lines * 0.8 - 16, #items + 4) + 0.5) + 16,
       width = 0.5,
-      preview = not vim.tbl_isempty(vim.lsp.get_clients({ bufnr = 0, name = "vtsls" })) and {
-        layout = "vertical",
-        vertical = "down:15,border-top",
-        hidden = "hidden",
-      } or {
-        layout = "vertical",
-        vertical = "down:15,border-top",
-      },
+      preview = { layout = "vertical", vertical = "down:15,border-top" },
     },
   } or {
     winopts = {
       width = 0.5,
-      -- height is number of items, with a max of 80% screen height
+      -- number of items, at most 80% of the screen
       height = math.floor(math.min(vim.o.lines * 0.8, #items + 4) + 0.5),
     },
   })
 end
 
-local opts = {
+-- fzf-lua's "default" profile (titles, fused borders, <Esc> hides for :FzfLua resume) sits underneath
+fzf.setup({
   fzf_colors = true,
-  fzf_opts = {
-    ["--no-scrollbar"] = true,
-  },
-  defaults = {
-    -- formatter = "path.filename_first",
-    formatter = "path.dirname_first",
-  },
-  previewers = {
-    builtin = {
-      extensions = {
-        ["png"] = img_previewer,
-        ["jpg"] = img_previewer,
-        ["jpeg"] = img_previewer,
-        ["gif"] = img_previewer,
-        ["webp"] = img_previewer,
-      },
-      ueberzug_scaler = "fit_contain",
-    },
-  },
-  winopts = {
-    width = 0.8,
-    height = 0.8,
-    row = 0.5,
-    col = 0.5,
-    preview = {
-      scrollchars = { "┃", "" },
-    },
-  },
+  fzf_opts = { ["--no-scrollbar"] = true },
+  defaults = { formatter = "path.dirname_first" },
+  winopts = { height = 0.8, row = 0.5, col = 0.5 },
+  -- alt-i/alt-h are fzf-lua defaults too; listing them here shows them in the picker header
   files = {
     cwd_prompt = false,
-    actions = {
-      ["alt-i"] = { actions.toggle_ignore },
-      ["alt-h"] = { actions.toggle_hidden },
-    },
+    actions = { ["alt-i"] = { actions.toggle_ignore }, ["alt-h"] = { actions.toggle_hidden } },
   },
-  grep = {
-    actions = {
-      ["alt-i"] = { actions.toggle_ignore },
-      ["alt-h"] = { actions.toggle_hidden },
-    },
-  },
+  grep = { actions = { ["alt-i"] = { actions.toggle_ignore }, ["alt-h"] = { actions.toggle_hidden } } },
   lsp = {
     symbols = {
       symbol_hl = function(s)
@@ -179,30 +111,12 @@ local opts = {
       end,
       child_prefix = false,
     },
-    code_actions = {
-      previewer = vim.fn.executable("delta") == 1 and "codeaction_native" or nil,
-    },
   },
-}
-
--- Base everything on the "default-title" profile, with the same (empty) prompt everywhere
-local function fix(t)
-  t.prompt = t.prompt ~= nil and " " or nil
-  for _, v in pairs(t) do
-    if type(v) == "table" then
-      fix(v)
-    end
-  end
-  return t
-end
-opts = vim.tbl_deep_extend("force", fix(require("fzf-lua.profiles.default-title")), opts)
-fzf.setup(opts)
+})
 fzf.register_ui_select(ui_select)
 
 local map = vim.keymap.set
 -- stylua: ignore start
-map("t", "<c-j>", "<c-j>", { nowait = true }) -- keep <c-j>/<c-k> in the fzf terminal window
-map("t", "<c-k>", "<c-k>", { nowait = true })
 map("n", "<leader>,", "<cmd>FzfLua buffers sort_mru=true sort_lastused=true<cr>", { desc = "Switch Buffer" })
 map("n", "<leader>/", pick("live_grep"), { desc = "Grep (Root Dir)" })
 map("n", "<leader>:", "<cmd>FzfLua command_history<cr>", { desc = "Command History" })
@@ -215,7 +129,7 @@ map("n", "<leader>ff", pick("files"), { desc = "Find Files (Root Dir)" })
 map("n", "<leader>fF", pick("files", { root = false }), { desc = "Find Files (cwd)" })
 map("n", "<leader>fg", "<cmd>FzfLua git_files<cr>", { desc = "Find Files (git-files)" })
 map("n", "<leader>fr", "<cmd>FzfLua oldfiles<cr>", { desc = "Recent" })
-map("n", "<leader>fR", pick("oldfiles", { cwd = vim.uv.cwd() }), { desc = "Recent (cwd)" })
+map("n", "<leader>fR", pick("oldfiles", { root = false, cwd_only = true }), { desc = "Recent (cwd)" })
 -- git
 map("n", "<leader>gc", "<cmd>FzfLua git_commits<CR>", { desc = "Commits" })
 map("n", "<leader>gd", "<cmd>FzfLua git_diff<cr>", { desc = "Git Diff (files)" })

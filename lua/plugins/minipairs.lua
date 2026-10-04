@@ -1,23 +1,10 @@
--- mini.pairs (from mini.nvim): auto close brackets and quotes. Toggle with <leader>up.
--- The `open` override (from LazyVim) skips pairing in strings, before word characters, when the
--- line already has more closing than opening pairs, and completes ``` fences in markdown.
+-- mini.pairs (from mini.nvim): auto close brackets and quotes, also in the cmdline. Toggle: <leader>up.
+-- The `open` wrapper (from LazyVim) skips pairing before a word character or one of %'[".`$, inside
+-- strings, and when the line has more closing than opening brackets; it completes ``` in markdown.
 local pack = require("config.pack")
 pack.add({ "nvim-mini/mini.nvim" })
 
 pack.later(function()
-  local opts = {
-    modes = { insert = true, command = true, terminal = false },
-    -- skip autopair when next character is one of these
-    skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
-    -- skip autopair when the cursor is inside these treesitter nodes
-    skip_ts = { "string" },
-    -- skip autopair when next character is closing pair
-    -- and there are more closing pairs than opening pairs
-    skip_unbalanced = true,
-    -- better deal with markdown code blocks
-    markdown = true,
-  }
-
   Snacks.toggle({
     name = "Mini Pairs",
     get = function()
@@ -29,7 +16,7 @@ pack.later(function()
   }):map("<leader>up")
 
   local pairs = require("mini.pairs")
-  pairs.setup(opts)
+  pairs.setup({ modes = { command = true } })
   local open = pairs.open
   pairs.open = function(pair, neigh_pattern)
     if vim.fn.getcmdline() ~= "" then
@@ -40,24 +27,22 @@ pack.later(function()
     local cursor = vim.api.nvim_win_get_cursor(0)
     local next = line:sub(cursor[2] + 1, cursor[2] + 1)
     local before = line:sub(1, cursor[2])
-    if opts.markdown and o == "`" and vim.bo.filetype == "markdown" and before:match("^%s*``") then
+    if o == "`" and vim.bo.filetype == "markdown" and before:match("^%s*``") then
       return "`\n```" .. vim.api.nvim_replace_termcodes("<up>", true, true, true)
     end
-    if opts.skip_next and next ~= "" and next:match(opts.skip_next) then
+    if next ~= "" and next:match([=[[%w%%%'%[%"%.%`%$]]=]) then
       return o
     end
-    if opts.skip_ts and #opts.skip_ts > 0 then
-      local ok, captures = pcall(vim.treesitter.get_captures_at_pos, 0, cursor[1] - 1, math.max(cursor[2] - 1, 0))
-      for _, capture in ipairs(ok and captures or {}) do
-        if vim.tbl_contains(opts.skip_ts, capture.capture) then
-          return o
-        end
+    local ok, captures = pcall(vim.treesitter.get_captures_at_pos, 0, cursor[1] - 1, math.max(cursor[2] - 1, 0))
+    for _, capture in ipairs(ok and captures or {}) do
+      if capture.capture == "string" then
+        return o
       end
     end
-    if opts.skip_unbalanced and next == c and c ~= o then
-      local _, count_open = line:gsub(vim.pesc(pair:sub(1, 1)), "")
-      local _, count_close = line:gsub(vim.pesc(pair:sub(2, 2)), "")
-      if count_close > count_open then
+    if next == c and c ~= o then
+      local _, n_open = line:gsub(vim.pesc(o), "")
+      local _, n_close = line:gsub(vim.pesc(c), "")
+      if n_close > n_open then
         return o
       end
     end
