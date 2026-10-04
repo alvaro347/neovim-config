@@ -1,5 +1,5 @@
--- conform: formatting (format on save, <leader>cf). Formatters come from mason (stylua, shfmt)
--- or fall back to the LSP. Toggle autoformat with <leader>uf (global) / <leader>uF (buffer).
+-- conform: format on save and <leader>cf / gq. stylua/shfmt come from mason, prettier from the project's
+-- node_modules; other filetypes fall back to the LSP. Toggle with <leader>uf (global) / <leader>uF.
 local pack = require("config.pack")
 pack.add({ "stevearc/conform.nvim" })
 
@@ -11,44 +11,46 @@ local function autoformat_enabled(buf)
   return vim.g.autoformat ~= false
 end
 
+-- prettier only runs where the project configures it (require_cwd below); elsewhere the LSP formats
+local web = { "prettierd", "prettier", stop_after_first = true }
+
+-- Not formatted on save (like plain Neovim); <leader>cf and gq still format them
+local no_save = { sh = true, yaml = true, proto = true }
+
 require("conform").setup({
-  default_format_opts = {
-    timeout_ms = 3000,
-    async = false, -- not recommended to change
-    quiet = false, -- not recommended to change
-    lsp_format = "fallback", -- not recommended to change
-  },
+  default_format_opts = { timeout_ms = 3000, lsp_format = "fallback" },
+  notify_no_formatters = false,
   formatters_by_ft = {
     lua = { "stylua" },
-    fish = { "fish_indent" },
     sh = { "shfmt" },
+    javascript = web,
+    javascriptreact = web,
+    typescript = web,
+    typescriptreact = web,
+    css = web,
+    scss = web,
+    yaml = web,
   },
-  -- The options you set here will be merged with the builtin formatters.
-  -- You can also define any custom formatters here.
   formatters = {
     injected = { options = { ignore_errors = true } },
+    prettier = { require_cwd = true },
+    prettierd = { require_cwd = true },
     -- Indentation comes from the buffer (options.lua, or a repo's .editorconfig), so typing and
-    -- formatting always agree. A repo's own stylua.toml still wins: no overrides are passed then.
+    -- formatting agree. A repo's own stylua.toml wins: no overrides are passed then.
     stylua = {
       prepend_args = function(_, ctx)
         if vim.fs.root(ctx.dirname, { "stylua.toml", ".stylua.toml" }) then
           return {}
         end
-        local bo = vim.bo[ctx.buf]
-        local width = bo.shiftwidth > 0 and bo.shiftwidth or bo.tabstop
-        return { "--indent-type", bo.expandtab and "Spaces" or "Tabs", "--indent-width", tostring(width) }
+        local style = vim.bo[ctx.buf].expandtab and "Spaces" or "Tabs"
+        return { "--indent-type", style, "--indent-width", tostring(ctx.shiftwidth) }
       end,
     },
-    -- # Example of using shfmt with extra args
-    -- shfmt = {
-    --   prepend_args = { "-i", "2", "-ci" },
-    -- },
   },
   format_on_save = function(buf)
-    if not autoformat_enabled(buf) then
-      return
+    if autoformat_enabled(buf) and not no_save[vim.bo[buf].filetype] then
+      return {} -- default_format_opts
     end
-    return {} -- use default_format_opts
   end,
 })
 
