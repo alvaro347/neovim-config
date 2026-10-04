@@ -1,4 +1,3 @@
+-- dark2026 (:colorscheme dark2026). Ships only a colors file: no Lua module, no setup().
 local pack = require("config.pack")
-pack.add({ "D0nw0r/dark2026.nvim" })
-
--- require("dark2026").setup({})
+pack.lazy({ "D0nw0r/dark2026.nvim" }, {})

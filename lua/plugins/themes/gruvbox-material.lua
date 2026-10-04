@@ -1,40 +1,22 @@
--- gruvbox-material: colorscheme option (init.lua applies zenbones; switch with :colorscheme).
--- Options are vim.g.* variables, so they must be set before :colorscheme runs.
+-- gruvbox-material (:colorscheme gruvbox-material). Options are vim.g.* variables read by its colors file.
 local pack = require("config.pack")
-pack.add({ "sainnhe/gruvbox-material" })
+pack.lazy({ "sainnhe/gruvbox-material" }, {}, function()
+  vim.g.gruvbox_material_foreground = "mix"
+  vim.g.gruvbox_material_enable_italic = 1
+  vim.g.gruvbox_material_transparent_background = 1
+  vim.g.gruvbox_material_better_performance = 1
+  vim.g.gruvbox_material_diagnostic_line_highlight = 1
+  vim.g.gruvbox_material_diagnostic_virtual_text = "highlighted"
 
--- Enable true colors
-vim.opt.termguicolors = true
-
--- Use dark background (you can change to 'light' if you prefer)
-vim.opt.background = "dark"
-
--- Gruvbox Material options
-vim.g.gruvbox_material_background = "medium" -- can be 'hard', 'medium', or 'soft'
-vim.g.gruvbox_material_foreground = "mix" -- can be 'material', 'mix' or 'original'
--- vim.g.gruvbox_material_enable_bold = 1
-vim.g.gruvbox_material_enable_italic = 1
-vim.g.gruvbox_material_transparent_background = 1 -- transparent background
-vim.g.gruvbox_material_better_performance = 1
-vim.g.gruvbox_material_diagnostic_text_highlight = 0
-vim.g.gruvbox_material_diagnostic_line_highlight = 1
-vim.g.gruvbox_material_diagnostic_virtual_text = "highlighted"
-
--- Create autocmd to customize highlights after colorscheme loads
-vim.api.nvim_create_autocmd("ColorScheme", {
-  group = vim.api.nvim_create_augroup("custom_highlights_gruvboxmaterial", {}),
-  pattern = "gruvbox-material",
-  callback = function()
-    local config = vim.fn["gruvbox_material#get_configuration"]()
-    local palette = vim.fn["gruvbox_material#get_palette"](config.background, config.foreground, config.colors_override)
-
-    -- Override LSP reference highlights with subtle background only
-    -- Using actual hex colors instead of palette to work with transparent mode
-    vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#3a3735" })
-    vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#3a3735" })
-    vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#3a3735" })
-
-    -- Change yank highlight to orange (uses IncSearch highlight group)
-    vim.api.nvim_set_hl(0, "IncSearch", { bg = "#d65d0e", fg = "#282828" })
-  end,
-})
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    group = vim.api.nvim_create_augroup("custom_highlights_gruvboxmaterial", {}),
+    pattern = "gruvbox-material",
+    callback = function()
+      -- Subtle LSP references; hex colours so they also work with the transparent background
+      for _, group in ipairs({ "LspReferenceText", "LspReferenceRead", "LspReferenceWrite" }) do
+        vim.api.nvim_set_hl(0, group, { bg = "#3a3735" })
+      end
+      vim.api.nvim_set_hl(0, "IncSearch", { bg = "#d65d0e", fg = "#282828" }) -- orange yank highlight
+    end,
+  })
+end)

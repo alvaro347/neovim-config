@@ -1,6 +1,5 @@
+-- cendre (:colorscheme cendre)
 local pack = require("config.pack")
-pack.add({ "Aejkatappaja/cendre" })
-
-require("cendre").setup({
-  transparent = true,
-})
+pack.lazy({ "Aejkatappaja/cendre" }, {}, function()
+  require("cendre").setup({ transparent = true })
+end)

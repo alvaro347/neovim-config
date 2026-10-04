@@ -1,7 +1,5 @@
 -- vscode.nvim (:colorscheme vscode)
 local pack = require("config.pack")
-pack.add({ "Mofiqul/vscode.nvim" })
-
-require("vscode").setup({
-  transparent = true,
-})
+pack.lazy({ "Mofiqul/vscode.nvim" }, {}, function()
+  require("vscode").setup({ transparent = true })
+end)

@@ -1,2 +1,3 @@
+-- no-clown-fiesta (:colorscheme no-clown-fiesta / -dark / -dim / -light)
 local pack = require("config.pack")
-pack.add({ "aktersnurra/no-clown-fiesta.nvim" })
+pack.lazy({ "aktersnurra/no-clown-fiesta.nvim" }, {})
