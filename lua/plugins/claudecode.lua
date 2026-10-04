@@ -20,26 +20,22 @@ pack.lazy({ "coder/claudecode.nvim" }, {
     "ClaudeCodeStop",
     "ClaudeCodeTreeAdd",
   },
+  -- static completion: loading claudecode while typing `:ClaudeCode ` would start its websocket server
+  complete = { ClaudeCodeAdd = "file" },
 }, function()
   require("claudecode").setup({})
 end)
 
 local map = vim.keymap.set
 map("n", "<leader>cic", "<cmd>ClaudeCode<cr>", { desc = "Toggle Claude" })
--- map("n", "<leader>af", "<cmd>ClaudeCodeFocus<cr>", { desc = "Focus Claude" })
--- map("n", "<leader>ar", "<cmd>ClaudeCode --resume<cr>", { desc = "Resume Claude" })
--- map("n", "<leader>aC", "<cmd>ClaudeCode --continue<cr>", { desc = "Continue Claude" })
--- map("n", "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", { desc = "Select Claude model" })
--- map("n", "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", { desc = "Add current buffer" })
-map("v", "<leader>cis", "<cmd>ClaudeCodeSend<cr>", { desc = "Send to Claude" })
--- Diff management
+map("x", "<leader>cis", "<cmd>ClaudeCodeSend<cr>", { desc = "Send to Claude" })
 map("n", "<leader>cia", "<cmd>ClaudeCodeDiffAccept<cr>", { desc = "Accept diff" })
 map("n", "<leader>cid", "<cmd>ClaudeCodeDiffDeny<cr>", { desc = "Deny diff" })
 
--- In file explorers <leader>cI adds the file under the cursor (<leader>ci* is the diff group)
+-- In neo-tree <leader>cI adds the file under the cursor
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("user_claudecode_tree", { clear = true }),
-  pattern = { "NvimTree", "neo-tree", "oil", "minifiles" },
+  pattern = "neo-tree",
   callback = function(ev)
     vim.keymap.set("n", "<leader>cI", "<cmd>ClaudeCodeTreeAdd<cr>", { buf = ev.buf, desc = "Add file" })
   end,

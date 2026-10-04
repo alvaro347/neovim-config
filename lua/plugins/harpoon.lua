@@ -1,31 +1,25 @@
 -- harpoon2: quick file marks (<leader>a menu, <leader>A add, <leader>1..5 jump).
+-- Set up on the first key: require("harpoon") writes a data file for the cwd.
 local pack = require("config.pack")
 pack.add({
   "nvim-lua/plenary.nvim",
   { "ThePrimeagen/harpoon", version = "harpoon2" },
 })
 
-local harpoon = require("harpoon")
-harpoon:setup({}) -- initialize with defaults
-
--- Helper to simplify key mapping
-local function map(lhs, rhs, desc)
-  vim.keymap.set("n", lhs, rhs, { desc = desc })
+local h
+local function harpoon()
+  if not h then
+    h = require("harpoon")
+    h:setup({})
+  end
+  return h
 end
 
--- Add current file to Harpoon list
-map("<leader>A", function()
-  harpoon:list():add()
-end, "Harpoon: add file")
-
--- Toggle the quick‐menu
-map("<leader>a", function()
-  harpoon.ui:toggle_quick_menu(harpoon:list())
-end, "Harpoon: quick menu")
-
--- Jump to specific files
+local map = vim.keymap.set
+-- stylua: ignore start
+map("n", "<leader>A", function() harpoon():list():add() end, { desc = "Harpoon: add file" })
+map("n", "<leader>a", function() harpoon().ui:toggle_quick_menu(harpoon():list()) end, { desc = "Harpoon: quick menu" })
 for i = 1, 5 do
-  map("<leader>" .. i, function()
-    harpoon:list():select(i)
-  end, "Harpoon: go to file " .. i)
+  map("n", "<leader>" .. i, function() harpoon():list():select(i) end, { desc = "Harpoon: go to file " .. i })
 end
+-- stylua: ignore end
