@@ -1,18 +1,17 @@
--- lualine: statusline. Component helpers (pretty_path, root_dir) are ported from LazyVim.
+-- lualine: statusline. format/pretty_path/root_name are trimmed ports of LazyVim's helpers.
 local pack = require("config.pack")
 pack.add({ "nvim-lualine/lualine.nvim" })
 
 local icons = require("config.icons")
 local util = require("config.util")
 
--- PERF: we don't need lualine's require madness
-local lualine_require = require("lualine_require")
-lualine_require.require = require
+-- PERF: lualine dofile()s its own modules; plain require goes through the vim.loader cache
+require("lualine_require").require = require
 
---- Format `text` with the colors of `hl_group` inside a lualine component
+--- `text` in `hl_group`'s fg/bold/italic inside a lualine component (no group: only escaped)
 local function format(component, text, hl_group)
   text = text:gsub("%%", "%%%%")
-  if not hl_group or hl_group == "" then
+  if not hl_group then
     return text
   end
   component.hl_cache = component.hl_cache or {}
@@ -34,95 +33,35 @@ local function format(component, text, hl_group)
   return component:format_hl(lualine_hl_group) .. text .. component:get_default_hl()
 end
 
---- Path relative to cwd (or root), shortened to `length` parts, filename highlighted
-local function pretty_path(opts)
-  opts = vim.tbl_extend("force", {
-    relative = "cwd",
-    modified_hl = "MatchParen",
-    directory_hl = "",
-    filename_hl = "Bold",
-    readonly_icon = " 󰌾 ",
-    length = 3,
-  }, opts or {})
-
-  return function(self)
-    local path = vim.fn.expand("%:p") --[[@as string]]
-    if path == "" then
-      return ""
-    end
-    path = vim.fs.normalize(path)
-    local root = vim.fs.normalize(util.root())
-    local cwd = vim.fs.normalize(assert(vim.uv.cwd()))
-
-    if opts.relative == "cwd" and path:find(cwd, 1, true) == 1 then
-      path = path:sub(#cwd + 2)
-    elseif path:find(root, 1, true) == 1 then
-      path = path:sub(#root + 2)
-    end
-
-    local sep = package.config:sub(1, 1)
-    local parts = vim.split(path, "[\\/]")
-    if opts.length > 0 and #parts > opts.length then
-      parts = { parts[1], "…", unpack(parts, #parts - opts.length + 2, #parts) }
-    end
-
-    if opts.modified_hl and vim.bo.modified then
-      parts[#parts] = format(self, parts[#parts], opts.modified_hl)
-    else
-      parts[#parts] = format(self, parts[#parts], opts.filename_hl)
-    end
-
-    local dir = ""
-    if #parts > 1 then
-      dir = table.concat({ unpack(parts, 1, #parts - 1) }, sep)
-      dir = format(self, dir .. sep, opts.directory_hl)
-    end
-
-    local readonly = ""
-    if vim.bo.readonly then
-      readonly = format(self, opts.readonly_icon, opts.modified_hl)
-    end
-    return dir .. parts[#parts] .. readonly
+--- File path relative to the cwd (else the project root), shortened to 3 parts. The name is
+--- bold, or MatchParen-coloured when modified; a lock follows when the buffer is readonly.
+local function pretty_path(self)
+  local path = vim.fn.expand("%:p") --[[@as string]]
+  if path == "" then
+    return ""
   end
+  path = vim.fs.normalize(path)
+  local cwd = vim.fs.normalize(assert(vim.uv.cwd()))
+  local root = vim.fs.normalize(util.root())
+  if path:find(cwd, 1, true) == 1 then
+    path = path:sub(#cwd + 2)
+  elseif path:find(root, 1, true) == 1 then
+    path = path:sub(#root + 2)
+  end
+  local parts = vim.split(path, "/", { plain = true })
+  if #parts > 3 then
+    parts = { parts[1], "…", parts[#parts - 1], parts[#parts] }
+  end
+  local name = format(self, table.remove(parts), vim.bo.modified and "MatchParen" or "Bold")
+  local dir = #parts > 0 and format(self, table.concat(parts, "/") .. "/") or ""
+  local readonly = vim.bo.readonly and format(self, " 󰌾 ", "MatchParen") or ""
+  return dir .. name .. readonly
 end
 
---- Name of the project root when it differs from the cwd
-local function root_dir(opts)
-  opts = vim.tbl_extend("force", {
-    cwd = false,
-    subdirectory = true,
-    parent = true,
-    other = true,
-    icon = "󱉭 ",
-    color = function()
-      return { fg = Snacks.util.color("Special") }
-    end,
-  }, opts or {})
-
-  local function get()
-    local cwd = vim.fs.normalize(assert(vim.uv.cwd()))
-    local root = vim.fs.normalize(util.root())
-    local name = vim.fs.basename(root)
-    if root == cwd then
-      return opts.cwd and name -- root is cwd
-    elseif root:find(cwd, 1, true) == 1 then
-      return opts.subdirectory and name -- root is subdirectory of cwd
-    elseif cwd:find(root, 1, true) == 1 then
-      return opts.parent and name -- root is parent directory of cwd
-    else
-      return opts.other and name -- root and cwd are not related
-    end
-  end
-
-  return {
-    function()
-      return (opts.icon or "") .. get()
-    end,
-    cond = function()
-      return type(get()) == "string"
-    end,
-    color = opts.color,
-  }
+--- Name of the project root, or nil when the root is the cwd
+local function root_name()
+  local root = vim.fs.normalize(util.root())
+  return root ~= vim.fs.normalize(assert(vim.uv.cwd())) and vim.fs.basename(root) or nil
 end
 
 --- Statusline theme derived from the current colorscheme, filled with the cursorline bg.
@@ -204,19 +143,47 @@ local function statusline_theme()
   return theme
 end
 
-local opts = {
+-- LSP symbol path under the cursor (trouble.nvim), created once trouble is loaded
+local symbols
+local trouble_symbols = {
+  function()
+    return symbols.get()
+  end,
+  cond = function()
+    if not symbols and package.loaded.trouble then
+      symbols = require("trouble").statusline({
+        mode = "symbols",
+        groups = {},
+        title = false,
+        filter = { range = true },
+        format = "{kind_icon}{symbol.name:Normal}",
+        hl_group = "lualine_c_normal",
+      })
+    end
+    return symbols ~= nil and symbols.has()
+  end,
+}
+
+require("lualine").setup({
   options = {
-    -- a function, so lualine re-derives it on every `:colorscheme`
-    theme = statusline_theme,
-    globalstatus = vim.o.laststatus == 3,
+    theme = statusline_theme, -- a function, so lualine re-derives it on every `:colorscheme`
     disabled_filetypes = { statusline = { "snacks_dashboard" } },
   },
   sections = {
     lualine_a = { "mode" },
     lualine_b = { "branch" },
-
     lualine_c = {
-      root_dir(),
+      {
+        function()
+          return "󱉭 " .. root_name()
+        end,
+        cond = function()
+          return root_name() ~= nil
+        end,
+        color = function()
+          return { fg = Snacks.util.color("Special") }
+        end,
+      },
       {
         "diagnostics",
         symbols = {
@@ -227,26 +194,18 @@ local opts = {
         },
       },
       { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
-      { pretty_path() },
+      { pretty_path },
+      trouble_symbols,
     },
     lualine_x = {
       Snacks.profiler.status(),
       {
         "diff",
-        symbols = {
-          added = icons.git.added,
-          modified = icons.git.modified,
-          removed = icons.git.removed,
-        },
+        symbols = { added = icons.git.added, modified = icons.git.modified, removed = icons.git.removed },
+        -- counts from gitsigns instead of running git diff
         source = function()
-          local gitsigns = vim.b.gitsigns_status_dict
-          if gitsigns then
-            return {
-              added = gitsigns.added,
-              modified = gitsigns.changed,
-              removed = gitsigns.removed,
-            }
-          end
+          local gs = vim.b.gitsigns_status_dict
+          return gs and { added = gs.added, modified = gs.changed, removed = gs.removed }
         end,
       },
     },
@@ -261,29 +220,4 @@ local opts = {
     },
   },
   extensions = { "neo-tree", "fzf" },
-}
-
--- Show the current LSP symbol path (via trouble.nvim) in the statusline
-pack.later(function()
-  local ok, trouble = pcall(require, "trouble")
-  if not ok then
-    return
-  end
-  local symbols = trouble.statusline({
-    mode = "symbols",
-    groups = {},
-    title = false,
-    filter = { range = true },
-    format = "{kind_icon}{symbol.name:Normal}",
-    hl_group = "lualine_c_normal",
-  })
-  table.insert(opts.sections.lualine_c, {
-    symbols.get,
-    cond = function()
-      return vim.b.trouble_lualine ~= false and symbols.has()
-    end,
-  })
-  require("lualine").setup(opts)
-end)
-
-require("lualine").setup(opts)
+})

@@ -16,16 +16,28 @@ local function term_nav(dir)
 end
 
 require("snacks").setup({
-  bigfile = { enabled = true },
+  bigfile = {
+    enabled = true,
+    -- snacks' default without its :NoMatchParen, which turns matchparen off in every buffer
+    setup = function(ctx)
+      vim.b[ctx.buf].matchparen_timeout = 10
+      vim.b[ctx.buf].matchparen_insert_timeout = 10
+      Snacks.util.wo(0, { foldmethod = "manual", statuscolumn = "", conceallevel = 0 })
+      vim.b.completion = false
+      vim.schedule(function()
+        if vim.api.nvim_buf_is_valid(ctx.buf) then
+          vim.bo[ctx.buf].syntax = ctx.ft
+        end
+      end)
+    end,
+  },
   quickfile = { enabled = true },
   indent = { enabled = true },
   input = { enabled = true },
   notifier = { enabled = true },
   scope = { enabled = true },
-  scroll = { enabled = true }, -- animations are off via vim.g.snacks_animate (options.lua)
-  statuscolumn = { enabled = false }, -- set through vim.o.statuscolumn below
+  statuscolumn = { enabled = true },
   words = { enabled = true },
-  toggle = { map = vim.keymap.set },
   terminal = {
     win = {
       keys = {
@@ -40,9 +52,7 @@ require("snacks").setup({
   },
   dashboard = {
     preset = {
-      pick = function(cmd, opts)
-        return util.pick_open(cmd, opts)
-      end,
+      pick = util.pick_open,
       header = [[
 
 ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗
@@ -59,7 +69,7 @@ require("snacks").setup({
         { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
         { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
         { icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
-        { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+        { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles', { root = false })" },
         { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
         { icon = " ", key = "s", desc = "Restore Session", action = ":lua require('persistence').load()" },
         { icon = "󰒲 ", key = "l", desc = "Plugins", action = ":PackStatus" },
@@ -71,19 +81,13 @@ require("snacks").setup({
       { section = "header" },
       { section = "keys", gap = 0, padding = 2 },
       { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 2 },
-      -- { icon = " ", title = "Projects", section = "projects", indent = 2, padding = 2 },
-      -- { section = "startup" },
     },
   },
 })
 
-vim.o.statuscolumn = "%!v:lua.require'snacks.statuscolumn'.get()"
-
 local map = vim.keymap.set
 -- stylua: ignore start
-map("n", "<leader>n", function()
-  if Snacks.config.picker and Snacks.config.picker.enabled then Snacks.picker.notifications() else Snacks.notifier.show_history() end
-end, { desc = "Notification History" })
+map("n", "<leader>n", function() Snacks.notifier.show_history() end, { desc = "Notification History" })
 map("n", "<leader>un", function() Snacks.notifier.hide() end, { desc = "Dismiss All Notifications" })
 map("n", "<leader>.", function() Snacks.scratch() end, { desc = "Toggle Scratch Buffer" })
 map("n", "<leader>S", function() Snacks.scratch.select() end, { desc = "Select Scratch Buffer" })
@@ -107,7 +111,7 @@ Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Ba
 Snacks.toggle.dim():map("<leader>uD")
 Snacks.toggle.animate():map("<leader>ua")
 Snacks.toggle.indent():map("<leader>ug")
-Snacks.toggle.scroll():map("<leader>uS")
+Snacks.toggle.scroll():map("<leader>uS") -- smooth scroll starts off; it also needs <leader>ua
 Snacks.toggle.profiler():map("<leader>dpp")
 Snacks.toggle.profiler_highlights():map("<leader>dph")
 Snacks.toggle.inlay_hints():map("<leader>uh")
@@ -133,6 +137,6 @@ map("n", "<leader>ft", function() Snacks.terminal(nil, { cwd = util.root() }) en
 map({ "n", "t" }, "<c-/>", function() Snacks.terminal.focus(nil, { cwd = util.root() }) end, { desc = "Terminal (Root Dir)" })
 map({ "n", "t" }, "<c-_>", function() Snacks.terminal.focus(nil, { cwd = util.root() }) end, { desc = "which_key_ignore" })
 
--- lua
-map({ "n", "x" }, "<localleader>r", function() Snacks.debug.run() end, { desc = "Run Lua" })
+-- lua buffers: run the file or selection
+Snacks.keymap.set({ "n", "x" }, "<localleader>r", function() Snacks.debug.run() end, { desc = "Run Lua", ft = "lua" })
 -- stylua: ignore end
