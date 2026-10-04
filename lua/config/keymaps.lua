@@ -1,6 +1,5 @@
--- Keymaps. Loaded from init.lua after all plugins.
--- Plugin specific keymaps live next to the plugin in lua/plugins/<plugin>.lua.
--- The first block is what LazyVim used to define for us; the second block is our own.
+-- Keymaps, loaded from init.lua after all plugins; plugin keymaps live next to the plugin in
+-- lua/plugins/<plugin>.lua. The first block is LazyVim's layout, the second block is our own.
 
 local map = vim.keymap.set
 
@@ -26,18 +25,18 @@ map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height" })
 map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
 map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
 
--- Move Lines
+-- Move Lines ("x", not "v": in Select mode typed keys must replace the selection)
 map("n", "<A-j>", "<cmd>execute 'move .+' . v:count1<cr>==", { desc = "Move Down" })
 map("n", "<A-k>", "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = "Move Up" })
 map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move Down" })
 map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move Up" })
-map("v", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = "Move Down" })
-map("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
+map("x", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = "Move Down" })
+map("x", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
 
 -- buffers (<S-h>/<S-l>/[b/]b and <leader>bd/bo/bi are defined by bufferline.lua / snacks.lua)
 map("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 map("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
-map("n", "<leader>bD", "<cmd>:bd<cr>", { desc = "Delete Buffer and Window" })
+map("n", "<leader>bD", "<cmd>bd<cr>", { desc = "Delete Buffer and Window" })
 
 -- Clear search and stop snippet on escape
 map({ "i", "n", "s" }, "<esc>", function()
@@ -46,7 +45,7 @@ map({ "i", "n", "s" }, "<esc>", function()
   return "<esc>"
 end, { expr = true, desc = "Escape and Clear hlsearch" })
 
--- Clear search, diff update and redraw
+-- Clear search, diff update and redraw (Neovim's default <C-l>, which moves windows here)
 map(
   "n",
   "<leader>ur",
@@ -55,7 +54,7 @@ map(
 )
 
 -- https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
--- (also keeps the cursor in the middle of the screen, see own keymaps below)
+-- (also keeps the cursor in the middle of the screen)
 map("n", "n", "'Nn'[v:searchforward].'zzzv'", { expr = true, desc = "Next Search Result" })
 map("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
 map("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
@@ -75,8 +74,8 @@ map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
 map("n", "<leader>K", "<cmd>norm! K<cr>", { desc = "Keywordprg" })
 
 -- better indenting
-map("x", "<", "<gv")
-map("x", ">", ">gv")
+map("x", "<", "<gv", { desc = "Indent Left" })
+map("x", ">", ">gv", { desc = "Indent Right" })
 
 -- commenting (native gc/gcc; ts-comments supplies commentstrings for embedded languages)
 map("n", "<leader>cc", "gcc", { remap = true, desc = "Comment Line" })
@@ -108,21 +107,13 @@ end, { desc = "Quickfix List" })
 
 -- [q / ]q are defined by trouble.lua (fall back to cprev/cnext when trouble is closed)
 
--- diagnostic
-local diagnostic_goto = function(next, severity)
+-- diagnostic: ]d/[d are Neovim's defaults; plugins/lsp.lua opens the float after every jump
+local function diagnostic_goto(next, severity)
   return function()
-    vim.diagnostic.jump({
-      count = (next and 1 or -1) * vim.v.count1,
-      severity = severity and vim.diagnostic.severity[severity] or nil,
-      on_jump = function(_, bufnr)
-        vim.diagnostic.open_float({ bufnr = bufnr, scope = "cursor", focus = false })
-      end,
-    })
+    vim.diagnostic.jump({ count = (next and 1 or -1) * vim.v.count1, severity = vim.diagnostic.severity[severity] })
   end
 end
 map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
-map("n", "]d", diagnostic_goto(true), { desc = "Next Diagnostic" })
-map("n", "[d", diagnostic_goto(false), { desc = "Prev Diagnostic" })
 map("n", "]e", diagnostic_goto(true, "ERROR"), { desc = "Next Error" })
 map("n", "[e", diagnostic_goto(false, "ERROR"), { desc = "Prev Error" })
 map("n", "]w", diagnostic_goto(true, "WARN"), { desc = "Next Warning" })
@@ -156,42 +147,51 @@ map("n", "<leader><tab>[", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 -- Own keymaps
 ---------------------------------------------------------------------------
 
--- Sets default file explorer to leader pv
-map("n", "<leader>pv", vim.cmd.Ex)
-map("n", "<leader>pr", vim.cmd.Rex)
+-- netrw (neo-tree owns <leader>e); :Rexplore only exists after netrw has been opened once
+map("n", "<leader>pv", vim.cmd.Explore, { desc = "Netrw (file dir)" })
+map("n", "<leader>pr", function()
+  if vim.fn.exists(":Rexplore") == 2 then
+    vim.cmd.Rexplore()
+  else
+    vim.cmd.Explore()
+  end
+end, { desc = "Netrw Return" })
 
 -- Move selected lines up and down with J and K
-map("v", "J", ":m '>+1<CR>gv=gv")
-map("v", "K", ":m '<-2<CR>gv=gv")
+map("x", "J", ":m '>+1<CR>gv=gv", { desc = "Move Selection Down" })
+map("x", "K", ":m '<-2<CR>gv=gv", { desc = "Move Selection Up" })
 
--- Keep cursor position when appending line with J
-map("n", "J", "mzJ`z")
+-- J joins lines without moving the cursor ([count] still joins that many lines)
+map("n", "J", function()
+  local view = vim.fn.winsaveview()
+  local ok, err = pcall(vim.cmd.normal, { math.max(vim.v.count, 2) .. "J", bang = true })
+  vim.fn.winrestview(view)
+  if not ok then -- e.g. E21 in a help buffer: show it like the built-in J does, without a Lua traceback
+    vim.api.nvim_echo({ { (tostring(err):gsub("^.-(E%d+:)", "%1")) } }, true, { err = true })
+  end
+end, { desc = "Join Lines (keep cursor)" })
 
 -- Keep cursor in the middle when jumping half page
 if vim.fn.has("macunix") == 1 then
-  map("n", "<D-d>", "<C-d>zz")
-  map("n", "<D-u>", "<C-u>zz")
+  map("n", "<D-d>", "<C-d>zz", { desc = "Half Page Down (centered)" })
+  map("n", "<D-u>", "<C-u>zz", { desc = "Half Page Up (centered)" })
 else
-  map("n", "<C-d>", "<C-d>zz")
-  map("n", "<C-u>", "<C-u>zz")
+  map("n", "<C-d>", "<C-d>zz", { desc = "Half Page Down (centered)" })
+  map("n", "<C-u>", "<C-u>zz", { desc = "Half Page Up (centered)" })
 end
 
--- Yank to clipboard
-map({ "n", "v" }, "<leader>y", [["+y]])
-map("n", "<leader>Y", [["+Y]])
+-- Yank to clipboard (plain y does the same while 'clipboard' is unnamedplus)
+map({ "n", "x" }, "<leader>y", [["+y]], { desc = "Yank to Clipboard" })
+map("n", "<leader>Y", [["+Y]], { desc = "Yank Line to Clipboard" })
 
--- Preserve yank after pasting
-map("x", "<leader>p", [["_dP]])
+-- Paste over a selection without yanking it (native visual P; "_dP misplaced it at end of line)
+map("x", "<leader>p", "P", { desc = "Paste without Yanking" })
 
 -- Color picker (ccc.nvim)
 map("n", "<leader>cp", vim.cmd.CccPick, { desc = "Color Picker" })
 
 -- Rename type / symbol
 map("n", "<leader>R", vim.lsp.buf.rename, { desc = "LSP Rename" })
-
-
--- -- Tabs
--- map("n", "<leader>bd", ":bd<CR>", { desc = "Buffer: Close current buffer" })
 
 -- Ripgrep for searching inside files
 map("n", "<leader>fa", function()
