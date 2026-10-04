@@ -1,28 +1,30 @@
--- mason: installs LSP servers and tools into ~/.local/share/nvim/mason (:Mason).
--- mason-lspconfig enables every installed server through vim.lsp.enable().
+-- mason: installs LSP servers and tools into stdpath("data")/mason (:Mason, <leader>cm) and puts
+-- them on PATH. The servers are listed (and enabled) in lua/config/lsp_servers.lua.
 local pack = require("config.pack")
-pack.add({ "mason-org/mason.nvim", "mason-org/mason-lspconfig.nvim", "neovim/nvim-lspconfig" })
+pack.add({ "mason-org/mason.nvim", "neovim/nvim-lspconfig" })
 
 require("mason").setup()
-
-require("mason-lspconfig").setup({
-  ensure_installed = { "cssls", "jdtls", "lua_ls", "protols", "pyright", "ts_ls", "yamlls" },
-  -- enable every installed server, except tools that only masquerade as one
-  automatic_enable = {
-    exclude = { "stylua" }, -- stylua is a formatter (used by conform), not an LSP
-  },
-})
-
 vim.keymap.set("n", "<leader>cm", "<cmd>Mason<cr>", { desc = "Mason" })
 
--- Non-LSP tools that should always be installed (formatters for conform.nvim; tree-sitter-cli
--- builds parsers for nvim-treesitter's main branch)
-local ensure_installed = { "stylua", "shfmt", "tree-sitter-cli" }
+-- mason package names: the servers, conform's formatters, and the tree-sitter CLI that
+-- nvim-treesitter needs to build parsers
+local tools = { "stylua", "shfmt", "tree-sitter-cli" }
+vim.list_extend(tools, vim.tbl_values(require("config.lsp_servers")))
+
+-- Install missing tools after startup. Usually just a few stat calls: the registry (which may
+-- download an update) is only refreshed when something is missing.
 pack.later(function()
-  local mr = require("mason-registry")
-  mr.refresh(function()
-    for _, tool in ipairs(ensure_installed) do
-      local ok, p = pcall(mr.get_package, tool)
+  local root = vim.fn.stdpath("data") .. "/mason/packages/"
+  local missing = vim.tbl_filter(function(tool)
+    return not vim.uv.fs_stat(root .. tool)
+  end, tools)
+  if #missing == 0 then
+    return
+  end
+  local registry = require("mason-registry")
+  registry.refresh(function()
+    for _, tool in ipairs(missing) do
+      local ok, p = pcall(registry.get_package, tool)
       if ok and not p:is_installed() then
         p:install()
       end
