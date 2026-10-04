@@ -1,17 +1,11 @@
 -- Thin layer over the built-in plugin manager (:h vim.pack, Neovim 0.12+).
---
---   local pack = require("config.pack")
---   pack.add({ "owner/repo", { "owner/repo", version = "branch-or-tag" } })  -- install + load now
---   pack.lazy({ "owner/repo" }, { cmd = "Foo", keys = { "<leader>x" } }, function() ... end)
---   pack.later(fn)            -- run after startup (what lazy.nvim called "VeryLazy")
---   pack.load_dir("plugins")  -- require() every lua/plugins/*.lua
---
--- Disabling a plugin works like before: rename its file to *.lua_OLD (only *.lua is
--- loaded), restart, then :PackClean removes it from disk.
---
--- Commands: :PackUpdate [names]   fetch updates, review, :write to apply
---           :PackStatus           list installed plugins/revisions (offline)
---           :PackClean            delete plugins that are installed but no longer declared
+--   pack.add({ "owner/repo", { "owner/repo", version = "main" } })  install + load now
+--   pack.lazy({ "owner/repo" }, { cmd = "Foo", ft = "bar" }, setup)  install now, load + setup on first use
+--   pack.lazy(list, {}, setup)  load only through pack.load(name) (themes: config/lazy_colors.lua)
+--   pack.later(fn)              run fn once startup has finished
+--   pack.load_dir("plugins")    require() every lua/plugins/*.lua
+-- To drop a plugin: delete its file (or rename it to *.lua_OLD), restart, then :PackClean.
+-- Commands: :PackUpdate [names], :PackStatus (offline), :PackClean.
 local M = {}
 
 local OPT_DIR = vim.fs.joinpath(vim.fn.stdpath("data"), "site", "pack", "core", "opt")
@@ -85,11 +79,12 @@ function M.load(name)
   end
 end
 
---- Install now, but only load + run `setup` on the first :Cmd, key, event or filetype.
+--- Install now, but only load + run `setup` on the first :Cmd or filetype (or on pack.load(name)).
 ---@param list (string|table)[]
----@param on { cmd?: string|string[], keys?: (string|{ [1]: string, mode?: string|string[], desc?: string })[], event?: string|string[], ft?: string|string[] }
+---@param on { cmd?: string|string[], ft?: string|string[], complete?: table<string, string> }
 ---@param setup? fun()
 function M.lazy(list, on, setup)
+  assert(not (on.keys or on.event), "pack.lazy: only cmd and ft triggers are supported")
   local fresh = register(list)
   if #fresh > 0 then
     vim.pack.add(fresh, { confirm = false, load = function() end })
@@ -118,46 +113,72 @@ function M.lazy(list, on, setup)
     loaders[n] = load
   end
 
-  -- :Cmd -> load, then re-run the real command with the same arguments
+  -- :Cmd (or completing its arguments) -> load, then hand over to the real command.
+  -- on.complete = { Cmd = "file" } gives static completion instead, which does not load the plugin
+  -- (commands of that call without an entry get no completion).
   for _, cmd in ipairs(as_list(on.cmd or {})) do
-    vim.api.nvim_create_user_command(cmd, function(a)
+    local function swap()
       pcall(vim.api.nvim_del_user_command, cmd)
       load()
+    end
+    local complete = on.complete and on.complete[cmd]
+    if not on.complete then
+      complete = function(_, line)
+        swap()
+        return vim.fn.getcompletion(line, "cmdline")
+      end
+    end
+    vim.api.nvim_create_user_command(cmd, function(a)
+      swap()
+      local nargs = (vim.api.nvim_get_commands({})[cmd] or {}).nargs
       vim.cmd({
         cmd = cmd,
-        args = a.fargs,
+        -- nargs=? and nargs=1 take the whole argument string as one argument
+        args = (nargs == "?" or nargs == "1") and a.args ~= "" and { a.args } or a.fargs,
         bang = a.bang,
         mods = a.smods,
         range = a.range == 2 and { a.line1, a.line2 } or a.range == 1 and { a.line1 } or nil,
       })
-    end, { nargs = "*", bang = true, range = true })
+    end, {
+      nargs = "*",
+      bang = true,
+      range = true,
+      complete = complete,
+    })
   end
 
-  -- key -> load (setup defines the real mapping), then replay the keys
-  for _, k in ipairs(as_list(on.keys or {})) do
-    k = type(k) == "table" and k or { k }
-    local mode = k.mode or "n"
-    vim.keymap.set(mode, k[1], function()
-      pcall(vim.keymap.del, mode, k[1])
-      load()
-      local keys = vim.api.nvim_replace_termcodes("<Ignore>" .. k[1], true, true, true)
-      vim.api.nvim_feedkeys((vim.v.count > 0 and vim.v.count or "") .. keys, "i", false)
-    end, { desc = k.desc })
-  end
-
-  local events = {}
-  for _, e in ipairs(as_list(on.event or {})) do
-    if e == "LazyFile" then -- LazyVim's pseudo event
-      vim.list_extend(events, { "BufReadPost", "BufNewFile", "BufWritePre" })
-    else
-      events[#events + 1] = e
-    end
-  end
-  if #events > 0 then
-    vim.api.nvim_create_autocmd(events, { once = true, callback = load })
-  end
+  -- filetype -> load. FileType already ran ftplugin/ and indent/ for this buffer while the plugin was not
+  -- on 'runtimepath': run them again for it, now in 'runtimepath' order (the plugin's files before
+  -- $VIMRUNTIME's, as for every later buffer). Plugins without such files skip this.
   if on.ft then
-    vim.api.nvim_create_autocmd("FileType", { once = true, pattern = as_list(on.ft), callback = load })
+    vim.api.nvim_create_autocmd("FileType", {
+      once = true,
+      pattern = as_list(on.ft),
+      callback = function(ev)
+        if done then
+          return
+        end
+        load()
+        local rerun = false
+        for _, n in ipairs(names) do
+          for _, dir in ipairs({ "ftplugin", "indent" }) do
+            local base = vim.fs.joinpath(OPT_DIR, n, dir, ev.match)
+            local files = vim.fn.glob(base .. "{.,_*.}{vim,lua}", true, true)
+            vim.list_extend(files, vim.fn.glob(base .. "/*.{vim,lua}", true, true))
+            rerun = rerun or #files > 0
+          end
+        end
+        if rerun then
+          vim.api.nvim_buf_call(ev.buf, function()
+            for _, group in ipairs({ "filetypeplugin", "filetypeindent" }) do
+              if vim.fn.exists("#" .. group .. "#FileType") == 1 then
+                vim.cmd.doautocmd({ group, "FileType", ev.match })
+              end
+            end
+          end)
+        end
+      end,
+    })
   end
 end
 
@@ -197,30 +218,18 @@ function M.load_dir(rel)
   end
 end
 
--- Post install/update hooks (lazy.nvim's `build`), keyed by plugin name.
--- They run inside vim.pack's async runner: keep them short, no nested vim.pack calls.
-local hooks = {
-  ["nvim-treesitter"] = function(ev)
-    -- Parsers live in stdpath("data")/site/parser; a fresh install reuses them and
-    -- plugins/treesitter.lua installs any missing ones. Only recompile on updates.
-    if ev.data.kind ~= "update" then
-      return
-    end
-    if not ev.data.active then
-      vim.cmd.packadd("nvim-treesitter")
-    end
-    require("nvim-treesitter").update(nil, { summary = true })
-  end,
-}
-
 --- Call once, before the first pack.add(): lockfile-driven installs fire PackChanged there.
 function M.setup()
+  -- Post-update hooks (lazy.nvim's `build`). They run inside vim.pack's async runner: keep them short.
   vim.api.nvim_create_autocmd("PackChanged", {
     group = vim.api.nvim_create_augroup("user_pack_hooks", { clear = true }),
     callback = function(ev)
-      local hook = hooks[ev.data.spec.name]
-      if hook then
-        hook(ev)
+      -- Recompile treesitter parsers after an update (a reinstall reuses site/parser)
+      if ev.data.spec.name == "nvim-treesitter" and ev.data.kind == "update" then
+        if not ev.data.active then
+          vim.cmd.packadd("nvim-treesitter")
+        end
+        require("nvim-treesitter").update(nil, { summary = true })
       end
     end,
   })

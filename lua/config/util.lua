@@ -1,4 +1,4 @@
--- Small helpers that replace LazyVim.root and LazyVim.pick.
+-- Project-root helpers for pickers, terminals and the statusline (what LazyVim.root/pick did).
 local M = {}
 
 local markers = { ".git", "lua" }
@@ -28,7 +28,7 @@ end
 
 --- Open an fzf-lua picker rooted at the project root.
 --- `opts.root = false` uses the cwd instead; an explicit `opts.cwd` always wins.
----@param cmd string   fzf-lua function name ("files", "live_grep", ...); "auto" means "files"
+---@param cmd string   fzf-lua function name ("files", "live_grep", ...)
 ---@param opts? table
 function M.pick_open(cmd, opts)
   local o = vim.deepcopy(opts or {})
@@ -36,10 +36,7 @@ function M.pick_open(cmd, opts)
     o.cwd = M.root(o.buf)
   end
   o.root, o.buf = nil, nil
-  if cmd == "git_files" and o.show_untracked and o.cmd == nil then
-    o.cmd = "git ls-files --exclude-standard --cached --others"
-  end
-  require("fzf-lua")[cmd == "auto" and "files" or cmd](o)
+  require("fzf-lua")[cmd](o)
 end
 
 --- Same as pick_open, but returns a function (handy for keymaps and the dashboard).
