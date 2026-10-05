@@ -1,5 +1,6 @@
 -- Neovim 0.12 config on the built-in plugin manager (:h vim.pack).
 --   lua/config/options.lua      options (loaded first)
+--   lua/config/languages.lua    per-language settings: indentation, wrapping, spelling
 --   lua/config/pack.lua         helper around vim.pack (add/lazy/later/load_dir, :Pack* commands)
 --   lua/config/lazy_colors.lua  loads a theme plugin on its first :colorscheme
 --   lua/config/keymaps.lua      general keymaps (plugin keymaps live with the plugin)
@@ -15,6 +16,7 @@ vim.loader.enable()
 vim.g.mapleader = " "
 
 require("config.options")
+require("config.languages")
 
 local pack = require("config.pack")
 require("config.lazy_colors")

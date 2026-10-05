@@ -53,43 +53,7 @@ opt.winminwidth = 5
 opt.wrap = false
 -- 'statuscolumn' is set in plugins/snacks.lua
 
--- Indent: 4 spaces by default, 2 for the filetypes below. Runtime ftplugins still apply on top
--- (Go keeps tabs). conform passes these values to stylua, and a repo's .editorconfig overrides them.
-opt.expandtab = true
-opt.shiftwidth = 4
-opt.softtabstop = 4
-opt.tabstop = 4
-vim.api.nvim_create_autocmd("FileType", {
-  group = vim.api.nvim_create_augroup("user_indent", { clear = true }),
-  pattern = {
-    "css",
-    "html",
-    "javascript",
-    "javascriptreact",
-    "json",
-    "jsonc",
-    "less",
-    "lua",
-    "scss",
-    "typescript",
-    "typescriptreact",
-    "yaml",
-  },
-  callback = function(ev)
-    local bo = vim.bo[ev.buf]
-    bo.expandtab, bo.shiftwidth, bo.softtabstop, bo.tabstop = true, 2, 2, 2
-  end,
-})
-
--- 'smartindent' only for rofi .rasi and hypr*.conf: `{ }` blocks and no indent script or parser.
--- Elsewhere it moved `#` to column 0 and made `>>` skip `#` lines (R9).
-vim.api.nvim_create_autocmd("FileType", {
-  group = vim.api.nvim_create_augroup("user_smartindent", { clear = true }),
-  pattern = { "hyprlang", "rasi" },
-  callback = function(ev)
-    vim.bo[ev.buf].smartindent = true
-  end,
-})
+-- Indentation and other per-language settings: lua/config/languages.lua
 
 -- Transparent themes (Normal has no bg): make floats and menus transparent too. update = true
 -- keeps the theme's fg and border colours; opaque themes keep their own floats.

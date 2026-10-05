@@ -71,16 +71,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Wrap and spell-check prose
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("wrap_spell"),
-  pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
-  callback = function()
-    vim.opt_local.wrap = true
-    vim.opt_local.spell = true
-  end,
-})
-
 -- Create missing parent directories on save, not for URLs such as scp:// (:h ++p)
 vim.api.nvim_create_autocmd({ "BufWritePre", "FileWritePre" }, {
   group = augroup("auto_create_dir"),
