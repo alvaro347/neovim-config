@@ -1,8 +1,7 @@
 -- conform: formats on save and with <leader>cf; the only thing that formats on save. Per buffer it runs the
 -- formatters below or, when none is available, the LSP server's formatting (e.g. dartls via flutter-tools).
 -- Project config wins: prettierd only where the project configures prettier, stylua uses a repo's
--- stylua.toml, dartls takes the line width from analysis_options.yaml (formatter: page_width, else
--- 1000: plugins/flutter.lua).
+-- stylua.toml, dartls takes the line width from analysis_options.yaml (formatter: page_width, else 80).
 -- stylua/shfmt/prettierd come from mason. Indentation per language: lua/config/languages.lua.
 local pack = require("config.pack")
 pack.add({ "stevearc/conform.nvim" })
@@ -31,7 +30,9 @@ local formatters_by_ft = {
 -- dart: no entry; dartls (started by flutter-tools) formats it through the LSP fallback
 
 -- Not formatted on save unless <leader>uF turns it on for the buffer; <leader>cf still formats them
-local no_save = { sh = true, yaml = true, proto = true }
+-- dart: dart format re-joins hand-split widgets (Dart 3.7+ ignores trailing commas unless the repo's
+-- analysis_options.yaml has formatter: trailing_commas: preserve) and splits long lines
+local no_save = { sh = true, yaml = true, proto = true, dart = true }
 
 -- conform ----------------------------------------------------------------------------------------------
 
