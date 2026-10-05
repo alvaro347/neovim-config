@@ -1,10 +1,5 @@
 {
   "plugins": {
-    "blink.cmp": {
-      "rev": "78336bc89ee5365633bcf754d93df01678b5c08f",
-      "src": "https://github.com/saghen/blink.cmp",
-      "version": "1.0.0 - 2.0.0"
-    },
     "bufferline.nvim": {
       "rev": "655133c3b4c3e5e05ec549b9f8cc2894ac6f51b3",
       "src": "https://github.com/akinsho/bufferline.nvim"
@@ -44,10 +39,6 @@
     "flutter-tools.nvim": {
       "rev": "11ca760211fcdfef1794df8cf2ff2b78aaf102b9",
       "src": "https://github.com/nvim-flutter/flutter-tools.nvim"
-    },
-    "friendly-snippets": {
-      "rev": "b4d01b0fdf3c9a549961c2f9ffe8dc09be166219",
-      "src": "https://github.com/rafamadriz/friendly-snippets"
     },
     "fzf-lua": {
       "rev": "13bb178a299f7493dd64427a58e61904c4b58ecb",
@@ -205,10 +196,6 @@
     "undotree": {
       "rev": "6fa6b57cda8459e1e4b2ca34df702f55242f4e4d",
       "src": "https://github.com/mbbill/undotree"
-    },
-    "vim-be-good": {
-      "rev": "0ae3de14eb8efc6effe7704b5e46495e91931cc5",
-      "src": "https://github.com/ThePrimeagen/vim-be-good"
     },
     "vim-fugitive": {
       "rev": "3b753cf8c6a4dcde6edee8827d464ba9b8c4a6f0",
