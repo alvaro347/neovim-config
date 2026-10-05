@@ -7,6 +7,7 @@ local ensure_installed = {
   "bash",
   "c",
   "css",
+  "dart",
   "diff",
   "html",
   "javascript",

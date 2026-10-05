@@ -13,6 +13,7 @@ vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("user_indent", { clear = true }),
   pattern = {
     "css",
+    "dart", -- dart format always indents 2
     "html",
     "javascript",
     "javascriptreact",
