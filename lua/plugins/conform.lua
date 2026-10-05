@@ -54,12 +54,15 @@ require("conform").setup({
   end,
 })
 
+-- gq formats with conform too (the LSP only sets 'formatexpr' where it is empty)
+vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+
 local map = vim.keymap.set
 map({ "n", "x" }, "<leader>cf", function()
   require("conform").format()
 end, { desc = "Format" })
 map({ "n", "x" }, "<leader>cF", function()
-  require("conform").format({ formatters = { "injected" }, timeout_ms = 3000 })
+  require("conform").format({ formatters = { "injected" } })
 end, { desc = "Format Injected Langs" })
 
 Snacks.toggle({

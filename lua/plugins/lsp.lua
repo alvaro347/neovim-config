@@ -2,11 +2,12 @@
 -- lua/config/lsp_servers.lua; base server configs come from nvim-lspconfig's lsp/ files.
 local pack = require("config.pack")
 pack.add({ "neovim/nvim-lspconfig" })
+require("config.lsp_servers")
 
 local icons = require("config.icons")
 
 vim.diagnostic.config({
-  virtual_text = { spacing = 4, source = "if_many", prefix = "●" },
+  virtual_text = { source = "if_many", prefix = "●" },
   severity_sort = true,
   signs = {
     text = {

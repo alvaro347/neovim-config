@@ -5,7 +5,7 @@
 --   lua/config/keymaps.lua      general keymaps (plugin keymaps live with the plugin)
 --   lua/config/autocmds.lua     autocmds
 --   lua/config/completion.lua   native completion (LSP and buffer words while typing)
---   lua/config/lsp_servers.lua  LSP servers to enable + their mason packages (used by plugins/mason.lua)
+--   lua/config/lsp_servers.lua  LSP servers to enable + their mason packages
 --   lua/plugins/*.lua           one file per plugin
 --   lua/plugins/themes/*.lua    colorschemes (zenbones is applied below)
 --   colors/*.lua                own *bones colorschemes
@@ -13,7 +13,6 @@
 vim.loader.enable()
 
 vim.g.mapleader = " "
-vim.g.maplocalleader = "\\"
 
 require("config.options")
 

@@ -14,10 +14,9 @@ map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, 
 map({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
 
 -- Move to window using the <ctrl> hjkl keys
-map("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window", remap = true })
-map("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window", remap = true })
-map("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window", remap = true })
-map("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window", remap = true })
+for key, dir in pairs({ h = "Left", j = "Lower", k = "Upper", l = "Right" }) do
+  map("n", "<C-" .. key .. ">", "<C-w>" .. key, { desc = "Go to " .. dir .. " Window" })
+end
 
 -- Resize window using <ctrl> arrow keys
 map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height" })
@@ -25,13 +24,25 @@ map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height" })
 map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
 map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
 
--- Move Lines ("x", not "v": in Select mode typed keys must replace the selection)
+-- Move [count] lines down/up and reindent; a selection at the buffer's edge just stays selected (the
+-- plain ":move" fails there with E16 and drops it). "x", not "v": in Select mode typed keys replace it.
+local function move_selection(down)
+  return function()
+    local top, bot = vim.fn.line("v"), vim.fn.line(".")
+    top, bot = math.min(top, bot), math.max(top, bot)
+    local n = math.min(vim.v.count1, down and vim.fn.line("$") - bot or top - 1)
+    if n == 0 then
+      return ""
+    end
+    return down and (":<C-u>'<,'>move '>+%d<cr>gv=gv"):format(n) or (":<C-u>'<,'>move '<-%d<cr>gv=gv"):format(n + 1)
+  end
+end
 map("n", "<A-j>", "<cmd>execute 'move .+' . v:count1<cr>==", { desc = "Move Down" })
 map("n", "<A-k>", "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = "Move Up" })
 map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move Down" })
 map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move Up" })
-map("x", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = "Move Down" })
-map("x", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
+map("x", "<A-j>", move_selection(true), { expr = true, desc = "Move Down" })
+map("x", "<A-k>", move_selection(false), { expr = true, desc = "Move Up" })
 
 -- buffers (<S-h>/<S-l>/[b/]b and <leader>bd/bo/bi are defined by bufferline.lua / snacks.lua)
 map("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
@@ -56,18 +67,16 @@ map(
 -- https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
 -- (also keeps the cursor in the middle of the screen)
 map("n", "n", "'Nn'[v:searchforward].'zzzv'", { expr = true, desc = "Next Search Result" })
-map("x", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
-map("o", "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
+map({ "x", "o" }, "n", "'Nn'[v:searchforward]", { expr = true, desc = "Next Search Result" })
 map("n", "N", "'nN'[v:searchforward].'zzzv'", { expr = true, desc = "Prev Search Result" })
-map("x", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
-map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
+map({ "x", "o" }, "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result" })
 
 -- Add undo break-points
 map("i", ",", ",<c-g>u")
 map("i", ".", ".<c-g>u")
 map("i", ";", ";<c-g>u")
 
--- save file
+-- save file (replaces Neovim's insert-mode <C-s> signature help: <C-k> in LSP buffers, plugins/lsp.lua)
 map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
 
 --keywordprg
@@ -196,8 +205,8 @@ map("n", "<leader>pv", function()
 end, { desc = "Netrw Toggle" })
 
 -- Move selected lines up and down with J and K
-map("x", "J", ":m '>+1<CR>gv=gv", { desc = "Move Selection Down" })
-map("x", "K", ":m '<-2<CR>gv=gv", { desc = "Move Selection Up" })
+map("x", "J", move_selection(true), { expr = true, desc = "Move Selection Down" })
+map("x", "K", move_selection(false), { expr = true, desc = "Move Selection Up" })
 
 -- J joins lines without moving the cursor ([count] still joins that many lines)
 map("n", "J", function()

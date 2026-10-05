@@ -9,24 +9,14 @@ for _, p in ipairs({ "python3", "node", "perl", "ruby" }) do
   vim.g["loaded_" .. p .. "_provider"] = 0
 end
 
-vim.g.snacks_animate = false -- no snacks animations
-
 local opt = vim.opt
 opt.autowrite = true
 opt.clipboard = "unnamedplus"
 opt.confirm = true -- ask to save instead of failing on :q with changes
 opt.cursorline = true
-opt.fillchars = {
-  foldopen = "",
-  foldclose = "",
-  fold = " ",
-  foldsep = " ",
-  diff = "╱",
-  eob = " ",
-}
+opt.fillchars = { fold = " ", diff = "╱", eob = " " } -- fold signs: snacks.statuscolumn
 opt.foldlevel = 99 -- foldmethod stays "manual"; plugins/treesitter.lua sets "expr" where a parser has folds
 opt.foldtext = ""
-opt.formatexpr = "v:lua.require'conform'.formatexpr()"
 opt.formatoptions = "jcroqlnt"
 opt.grepprg = "rg --vimgrep" -- the default adds -uu; this one respects .gitignore
 opt.ignorecase = true
@@ -41,7 +31,7 @@ opt.pumheight = 10
 opt.relativenumber = true
 opt.ruler = false -- laststatus=0 screens (snacks dashboard) would show it in the command line
 opt.scrolloff = 8
-opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
+opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "folds" }
 opt.shiftround = true
 opt.shortmess:append({ W = true, I = true, c = true })
 opt.showmode = false -- lualine shows the mode

@@ -1,7 +1,6 @@
 -- claudecode: Claude Code integration (<leader>ci*). Loaded on first command/keymap so the
 -- websocket server only starts when used.
 local pack = require("config.pack")
-pack.add({ "folke/snacks.nvim" }) -- dependency
 pack.lazy({ "coder/claudecode.nvim" }, {
   cmd = {
     "ClaudeCode",

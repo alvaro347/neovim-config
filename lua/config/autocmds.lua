@@ -4,8 +4,8 @@ local function augroup(name)
   return vim.api.nvim_create_augroup("user_" .. name, { clear = true })
 end
 
--- Reload files changed outside Neovim (also after a terminal job such as lazygit)
-vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+-- Reload files changed by a terminal job such as lazygit ('autoread'; Neovim checks on FocusGained itself)
+vim.api.nvim_create_autocmd({ "TermClose", "TermLeave" }, {
   group = augroup("checktime"),
   callback = function()
     if vim.o.buftype ~= "nofile" then
@@ -55,7 +55,7 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.bo[ev.buf].buflisted = false
     vim.schedule(function()
       vim.keymap.set("n", "q", function()
-        vim.cmd("close")
+        pcall(vim.cmd.close) -- E444 in the last window: the buffer still goes
         pcall(vim.api.nvim_buf_delete, ev.buf, { force = true })
       end, { buf = ev.buf, silent = true, desc = "Quit buffer" })
     end)
@@ -81,14 +81,12 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Create missing parent directories on save (not for URLs such as scp://)
-vim.api.nvim_create_autocmd("BufWritePre", {
+-- Create missing parent directories on save, not for URLs such as scp:// (:h ++p)
+vim.api.nvim_create_autocmd({ "BufWritePre", "FileWritePre" }, {
   group = augroup("auto_create_dir"),
   callback = function(ev)
-    if ev.match:match("^%w%w+:[\\/][\\/]") then
-      return
+    if not ev.match:find("://", 1, true) then
+      vim.fn.mkdir(vim.fn.fnamemodify(ev.match, ":p:h"), "p")
     end
-    local file = vim.uv.fs_realpath(ev.match) or ev.match
-    vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
 })

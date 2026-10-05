@@ -1,5 +1,6 @@
--- LSP servers: Neovim's built-in client starts them (vim.lsp.enable, 0.11+), nvim-lspconfig provides
--- each server's defaults (its lsp/<name>.lua) and mason installs the binaries (plugins/mason.lua).
+-- LSP servers: Neovim's built-in client starts them (vim.lsp.enable, 0.11+; required by plugins/lsp.lua),
+-- nvim-lspconfig provides each server's defaults (its lsp/<name>.lua) and mason installs the binaries
+-- (plugins/mason.lua).
 -- To add a language: install its server in :Mason and add one line here.
 local servers = { -- nvim-lspconfig name = mason package
   cssls = "css-lsp",

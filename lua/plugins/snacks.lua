@@ -3,6 +3,8 @@
 local pack = require("config.pack")
 pack.add({ "folke/snacks.nvim" })
 
+vim.g.snacks_animate = false -- no snacks animations
+
 local util = require("config.util")
 
 -- <C-h/j/k/l> in a floating terminal are passed through, in a split they switch windows
@@ -17,7 +19,6 @@ end
 
 require("snacks").setup({
   bigfile = {
-    enabled = true,
     -- snacks' default without its :NoMatchParen, which turns matchparen off in every buffer
     setup = function(ctx)
       vim.b[ctx.buf].matchparen_timeout = 10
@@ -31,13 +32,14 @@ require("snacks").setup({
       end)
     end,
   },
-  quickfile = { enabled = true },
-  indent = { enabled = true },
-  input = { enabled = true },
-  notifier = { enabled = true },
-  scope = { enabled = true },
-  statuscolumn = { enabled = true },
-  words = { enabled = true },
+  -- a module listed here is enabled
+  quickfile = {},
+  indent = {},
+  input = {},
+  notifier = {},
+  scope = {},
+  statuscolumn = {},
+  words = {},
   terminal = {
     win = {
       keys = {
