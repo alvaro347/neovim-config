@@ -3,6 +3,7 @@
 --                  characters, docs come from "completionItem/resolve" in the 'completeopt' popup, accepted
 --                  snippets expand with vim.snippet (<Tab>/<S-Tab> jump: Neovim's default maps)
 --   other buffers  'autocomplete': words from this buffer, other windows and listed buffers
+--   ':' commands   the 'wildmenu' opens while typing (bottom of this file)
 -- Keys: <C-Space> complete, <CR> accepts the selected item (else mini.pairs' <CR>), <C-y> accepts the selected or
 -- the first item, <C-n>/<C-p> insert and <Up>/<Down> select an item, <C-e> cancels, <C-x><C-f> file names.
 -- Signature help: <C-k> (plugins/lsp.lua). No automatic menu where vim.b.completion = false (snacks bigfile,
@@ -119,3 +120,15 @@ map("i", "<C-Space>", function()
   end
   return lsp_completes(vim.api.nvim_get_current_buf()) and "<Cmd>lua vim.lsp.completion.get()<CR>" or "<C-n>"
 end, { expr = true, desc = "Complete" })
+
+-- ':' command line: the menu opens while typing (:h cmdline-autocompletion). Nothing is selected until
+-- <Tab>/<S-Tab> or <C-n>/<C-p>, so <CR> runs what was typed. <Up>/<Down> recall history; while the menu
+-- is open <Left>/<Right> select too (<C-e> closes it).
+vim.o.wildmode = "noselect:lastused,full"
+vim.api.nvim_create_autocmd("CmdlineChanged", {
+  group = group,
+  pattern = ":",
+  callback = function()
+    vim.fn.wildtrigger()
+  end,
+})

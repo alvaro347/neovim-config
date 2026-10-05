@@ -47,7 +47,6 @@ opt.undofile = true
 opt.undolevels = 10000
 opt.updatetime = 200 -- CursorHold and swap writes
 opt.virtualedit = "block"
-opt.wildmode = "longest:full,full"
 opt.winborder = "single"
 opt.winminwidth = 5
 opt.wrap = false
