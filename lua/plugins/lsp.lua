@@ -57,6 +57,9 @@ vim.lsp.config("ts_ls", {
   settings = { typescript = { inlayHints = ts_hints }, javascript = { inlayHints = ts_hints } },
 })
 
+-- nvim-lspconfig also lists yaml.docker-compose/.gitlab/.helm-values, which nothing sets (:checkhealth warns)
+vim.lsp.config("yamlls", { filetypes = { "yaml" } })
+
 -- Buffer-local keymaps for what the attached server supports. Neovim already maps K (hover) and
 -- gra/gri/grn/grr/grt (:h lsp-defaults); grr is replaced below by the fzf-lua picker.
 vim.api.nvim_create_autocmd("LspAttach", {
