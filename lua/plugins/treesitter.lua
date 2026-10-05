@@ -47,6 +47,18 @@ end)
 
 local group = vim.api.nvim_create_augroup("user_treesitter", { clear = true })
 
+-- :PackUpdate changed nvim-treesitter: rebuild the parsers whose revision changed (lazy.nvim's
+-- `build = ":TSUpdate"`). update() rereads the parser list from disk and runs async.
+vim.api.nvim_create_autocmd("PackChanged", {
+  group = group,
+  callback = function(ev)
+    if ev.data.spec.name == "nvim-treesitter" and ev.data.kind == "update" then
+      require("nvim-treesitter").update(nil, { summary = true })
+    end
+  end,
+})
+
+
 local function expr_folds(win)
   vim.wo[win][0].foldmethod = "expr"
   vim.wo[win][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"

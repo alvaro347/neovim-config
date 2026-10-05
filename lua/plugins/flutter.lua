@@ -4,7 +4,11 @@ local pack = require("config.pack")
 pack.add({ "nvim-lua/plenary.nvim" })
 pack.lazy({ "nvim-flutter/flutter-tools.nvim" }, { ft = "dart" }, function()
   require("flutter-tools").setup({})
-  -- flutter-tools starts on BufEnter, which already fired for the buffer that triggered the load
-  -- (its ftplugin, which attaches the LSP, is sourced for that buffer by pack.lazy)
-  vim.api.nvim_exec_autocmds("BufEnter", { group = "FlutterToolsGroup", buf = vim.api.nvim_get_current_buf() })
+  -- BufEnter (starts flutter-tools) and FileType (its ftplugin/dart/, which attaches the LSP) already ran
+  -- without the plugin for the buffer that triggered the load: run them again for it
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_exec_autocmds("BufEnter", { group = "FlutterToolsGroup", buf = buf })
+  if vim.bo[buf].filetype == "dart" then
+    vim.cmd.doautocmd({ "filetypeplugin", "FileType", "dart" })
+  end
 end)
