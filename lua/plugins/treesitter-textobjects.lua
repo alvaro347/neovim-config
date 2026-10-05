@@ -2,7 +2,7 @@
 -- ]f/[f function, ]c/[c class, ]a/[a argument moves, and af/if, ac/ic, aa/ia selections (x, o).
 -- The other a/i textobjects are Neovim's own (aw, ap, a(, a", at, an/in, ...).
 local pack = require("config.pack")
-pack.add({ { "nvim-treesitter/nvim-treesitter-textobjects", version = "main" } })
+pack.add({ "nvim-treesitter/nvim-treesitter-textobjects" })
 
 local moves = {
   goto_next_start = { ["]f"] = "@function.outer", ["]c"] = "@class.outer", ["]a"] = "@parameter.inner" },
@@ -20,8 +20,6 @@ local selects = {
 }
 
 pack.later(function()
-  require("nvim-treesitter-textobjects").setup({ move = { set_jumps = true } })
-
   local function attach(buf)
     local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
     if not lang then

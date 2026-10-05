@@ -3,7 +3,7 @@ local M = {}
 
 local markers = { ".git", "lua" }
 
---- Project root of a buffer: LSP root dir, else nearest marker, else cwd.
+--- Project root of a buffer: LSP root dir (if the file is inside it), else nearest marker, else cwd.
 ---@param buf? integer
 ---@return string
 function M.root(buf)
@@ -11,12 +11,11 @@ function M.root(buf)
   local file = vim.api.nvim_buf_get_name(buf)
   for _, client in ipairs(vim.lsp.get_clients({ bufnr = buf })) do
     local dir = client.root_dir
-    if dir and file:find(dir, 1, true) == 1 then
+    if dir and (file == dir or vim.startswith(file, (dir:gsub("/$", "")) .. "/")) then
       return dir
     end
   end
-  local root = vim.fs.root(file ~= "" and file or buf, markers)
-  return root or assert(vim.uv.cwd())
+  return vim.fs.root(buf, markers) or assert(vim.uv.cwd()) -- non-file buffers: from the cwd
 end
 
 --- Git root of the current project root (falls back to the project root).

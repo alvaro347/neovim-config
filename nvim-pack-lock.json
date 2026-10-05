@@ -148,13 +148,11 @@
     },
     "nvim-treesitter": {
       "rev": "f603a2f4da48728f80257fb5fbb90145fd1dc173",
-      "src": "https://github.com/nvim-treesitter/nvim-treesitter",
-      "version": "'main'"
+      "src": "https://github.com/nvim-treesitter/nvim-treesitter"
     },
     "nvim-treesitter-textobjects": {
       "rev": "5c7b0263797dfd1bd6202f2b219f3b53a80b2187",
-      "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
-      "version": "'main'"
+      "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects"
     },
     "nvim-ts-autotag": {
       "rev": "88c1453db4ba7dd24131086fe51fdf74e587d275",

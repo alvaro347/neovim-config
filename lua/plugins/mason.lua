@@ -1,7 +1,7 @@
 -- mason: installs LSP servers and tools into stdpath("data")/mason (:Mason, <leader>cm) and puts
--- them on PATH. The servers are listed (and enabled) in lua/config/lsp_servers.lua.
+-- them on PATH. The servers are listed in lua/config/lsp_servers.lua (enabled by plugins/lsp.lua).
 local pack = require("config.pack")
-pack.add({ "mason-org/mason.nvim", "neovim/nvim-lspconfig" })
+pack.add({ "mason-org/mason.nvim" })
 
 require("mason").setup()
 vim.keymap.set("n", "<leader>cm", "<cmd>Mason<cr>", { desc = "Mason" })

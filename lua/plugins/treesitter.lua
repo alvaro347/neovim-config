@@ -1,7 +1,7 @@
 -- nvim-treesitter (main branch): installs parsers into stdpath("data")/site/parser (:TSInstall <lang>,
 -- :TSUpdate). Highlighting, indentation and folds are Neovim's own, enabled per buffer below.
 local pack = require("config.pack")
-pack.add({ { "nvim-treesitter/nvim-treesitter", version = "main" } })
+pack.add({ "nvim-treesitter/nvim-treesitter" })
 
 local ensure_installed = {
   "bash",
@@ -57,7 +57,6 @@ vim.api.nvim_create_autocmd("PackChanged", {
     end
   end,
 })
-
 
 local function expr_folds(win)
   vim.wo[win][0].foldmethod = "expr"
