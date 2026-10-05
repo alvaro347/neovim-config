@@ -28,7 +28,6 @@ vim.diagnostic.config({
 vim.lsp.document_color.enable(false)
 
 -- All servers: announce file-rename support so <leader>cR (Snacks.rename) can update imports.
--- blink.cmp adds its completion capabilities on top (blink.cmp/plugin/blink-cmp.lua).
 vim.lsp.config("*", {
   capabilities = { workspace = { fileOperations = { didRename = true, willRename = true } } },
 })
@@ -82,7 +81,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("gy", "<cmd>FzfLua lsp_typedefs        jump1=true ignore_current_line=true<cr>", "Goto T[y]pe Definition")
     map("gD", vim.lsp.buf.declaration, "Goto Declaration")
     if has("signatureHelp") then
-      map("gK", vim.lsp.buf.signature_help, "Signature Help") -- insert mode: blink's <C-k>
+      map("gK", vim.lsp.buf.signature_help, "Signature Help")
+      map("<C-k>", function() -- toggles; stays in Insert mode
+        local win = vim.b.lsp_floating_preview
+        if win and vim.api.nvim_win_is_valid(win) and vim.w[win]["textDocument/signatureHelp"] then
+          return vim.api.nvim_win_close(win, true)
+        end
+        vim.lsp.buf.signature_help({ focus = false })
+      end, "Signature Help", "i")
     end
     if has("codeAction") then
       map("<leader>ca", vim.lsp.buf.code_action, "Code Action", { "n", "x" })

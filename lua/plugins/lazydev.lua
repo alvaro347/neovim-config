@@ -9,9 +9,4 @@ pack.lazy({ "folke/lazydev.nvim" }, { ft = "lua", cmd = "LazyDev" }, function()
       { path = "/usr/share/hypr/stubs", files = { "hyprland.lua" } },
     },
   })
-
-  -- completion source for blink.cmp (plugins/blink.lua), shown above LSP results
-  local blink = require("blink.cmp")
-  blink.add_source_provider("lazydev", { name = "LazyDev", module = "lazydev.integrations.blink", score_offset = 100 })
-  blink.add_filetype_source("lua", "lazydev")
 end)

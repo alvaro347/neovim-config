@@ -1,4 +1,4 @@
--- Icons shared by lsp, lualine, bufferline (diagnostics, git) and blink (LSP completion kinds).
+-- Icons shared by lsp, lualine, bufferline (diagnostics, git) and config/completion.lua (LSP kinds).
 local M = {
   diagnostics = {
     Error = " ",
