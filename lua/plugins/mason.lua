@@ -8,7 +8,7 @@ vim.keymap.set("n", "<leader>cm", "<cmd>Mason<cr>", { desc = "Mason" })
 
 -- mason package names: the servers, conform's formatters, and the tree-sitter CLI that
 -- nvim-treesitter needs to build parsers
-local tools = { "stylua", "shfmt", "tree-sitter-cli" }
+local tools = { "stylua", "shfmt", "prettierd", "tree-sitter-cli" }
 vim.list_extend(tools, vim.tbl_values(require("config.lsp_servers")))
 
 -- Install missing tools after startup. Usually just a few stat calls: the registry (which may
