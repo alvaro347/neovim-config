@@ -1,5 +1,5 @@
--- conform: format on save and <leader>cf / gq. stylua/shfmt come from mason, prettier from the project's
--- node_modules; other filetypes fall back to the LSP. Toggle with <leader>uf (global) / <leader>uF.
+-- conform: format on save and <leader>cf / gq. stylua/shfmt/prettierd come from mason (prettierd runs the
+-- project's own prettier when it has one); other filetypes fall back to the LSP. Toggle with <leader>uf (global) / <leader>uF.
 local pack = require("config.pack")
 pack.add({ "stevearc/conform.nvim" })
 
@@ -11,8 +11,8 @@ local function autoformat_enabled(buf)
   return vim.g.autoformat ~= false
 end
 
--- prettier only runs where the project configures it (require_cwd below); elsewhere the LSP formats
-local web = { "prettierd", "prettier", stop_after_first = true }
+-- prettierd only runs where the project configures prettier (require_cwd below); elsewhere the LSP formats
+local web = { "prettierd" }
 
 -- Not formatted on save (like plain Neovim); <leader>cf and gq still format them
 local no_save = { sh = true, yaml = true, proto = true }
@@ -33,7 +33,6 @@ require("conform").setup({
   },
   formatters = {
     injected = { options = { ignore_errors = true } },
-    prettier = { require_cwd = true },
     prettierd = { require_cwd = true },
     -- Indentation comes from the buffer (options.lua, or a repo's .editorconfig), so typing and
     -- formatting agree. A repo's own stylua.toml wins: no overrides are passed then.
