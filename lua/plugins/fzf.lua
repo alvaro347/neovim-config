@@ -51,6 +51,8 @@ config.defaults.keymap.fzf["ctrl-f"] = "preview-page-down"
 config.defaults.keymap.fzf["ctrl-b"] = "preview-page-up"
 config.defaults.keymap.builtin["<c-f>"] = "preview-page-down"
 config.defaults.keymap.builtin["<c-b>"] = "preview-page-up"
+-- no hidden pickers: fzf-lua binds <M-Esc> to "hide" (the "hide" profile used to unbind it)
+config.defaults.keymap.builtin["<M-Esc>"] = nil
 
 -- <c-t> sends the results to a Trouble list (needs trouble.lua loaded and set up first)
 if pcall(require, "plugins.trouble") then
@@ -72,6 +74,9 @@ config.set_action_helpstr(config.defaults.actions.files["ctrl-r"], "toggle-root-
 local function ui_select(fzf_opts, items)
   return vim.tbl_deep_extend("force", fzf_opts, {
     prompt = " ",
+    -- :FzfLua resume skips it: resuming would call on_choice again, for a stale context (the previous
+    -- picker keeps its place but loses its query)
+    no_resume = true,
     winopts = { title = " " .. vim.trim((fzf_opts.prompt or "Select"):gsub("%s*:%s*$", "")) .. " " },
   }, fzf_opts.kind == "codeaction" and {
     winopts = {
@@ -89,8 +94,11 @@ local function ui_select(fzf_opts, items)
   })
 end
 
--- fzf-lua's "default" profile (titles, fused borders, <Esc> hides for :FzfLua resume) sits underneath
+-- fzf-lua's "default" profile minus "hide", whose <Esc> only hid the picker and left fzf running (a hidden
+-- vim.ui.select, e.g. <leader>ca's code actions, never calls back). <Esc> aborts; :FzfLua resume reruns the
+-- last picker with its query.
 fzf.setup({
+  "border-fused", -- titles, fused borders
   fzf_colors = true,
   fzf_opts = { ["--no-scrollbar"] = true },
   defaults = { formatter = "path.dirname_first" },
