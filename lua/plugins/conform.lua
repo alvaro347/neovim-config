@@ -34,8 +34,8 @@ require("conform").setup({
   formatters = {
     injected = { options = { ignore_errors = true } },
     prettierd = { require_cwd = true },
-    -- Indentation comes from the buffer (options.lua, or a repo's .editorconfig), so typing and
-    -- formatting agree. A repo's own stylua.toml wins: no overrides are passed then.
+    -- Indentation comes from the buffer (lua/config/languages.lua, or a repo's .editorconfig), so typing
+    -- and formatting agree. A repo's own stylua.toml wins: no overrides are passed then.
     stylua = {
       prepend_args = function(_, ctx)
         if vim.fs.root(ctx.dirname, { "stylua.toml", ".stylua.toml" }) then
