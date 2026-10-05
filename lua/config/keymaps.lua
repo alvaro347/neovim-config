@@ -147,15 +147,53 @@ map("n", "<leader><tab>[", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 -- Own keymaps
 ---------------------------------------------------------------------------
 
--- netrw (neo-tree owns <leader>e); :Rexplore only exists after netrw has been opened once
-map("n", "<leader>pv", vim.cmd.Explore, { desc = "Netrw (file dir)" })
-map("n", "<leader>pr", function()
-  if vim.fn.exists(":Rexplore") == 2 then
-    vim.cmd.Rexplore()
-  else
-    vim.cmd.Explore()
+-- netrw (neo-tree owns <leader>e): opens the current file's directory; inside netrw it goes back to the buffer
+-- netrw was entered from, else to an empty buffer. Buffers by number: unnamed, help and terminal buffers work too.
+local function netrw_return_ok(buf)
+  return buf ~= nil
+    and buf > 0
+    and vim.api.nvim_buf_is_valid(buf)
+    and vim.bo[buf].filetype ~= "netrw"
+    and vim.fn.isdirectory(vim.api.nvim_buf_get_name(buf)) == 0
+end
+-- w:pv_origin: the last such buffer the window left, however netrw was entered (<leader>pv, :e <dir>, gf)
+local group = vim.api.nvim_create_augroup("netrw_toggle", { clear = true })
+vim.api.nvim_create_autocmd("BufLeave", {
+  group = group,
+  callback = function(ev)
+    if netrw_return_ok(ev.buf) then
+      vim.w.pv_origin = ev.buf
+    end
+  end,
+})
+-- `nvim <dir>`, :e <dir> and gf leave a listed buffer named after the directory next to netrw's own (unlisted)
+-- listing: unlist it, or bufferline shows it
+vim.api.nvim_create_autocmd("FileType", {
+  group = group,
+  pattern = "netrw",
+  callback = function()
+    local alt = vim.fn.bufnr("#")
+    if alt > 0 and vim.bo[alt].buflisted and vim.fn.isdirectory(vim.api.nvim_buf_get_name(alt)) == 1 then
+      vim.bo[alt].buflisted = false
+    end
+  end,
+})
+map("n", "<leader>pv", function()
+  if vim.bo.filetype ~= "netrw" then
+    return vim.cmd.Explore()
   end
-end, { desc = "Netrw Return" })
+  -- "#" is where :Explore was run from until netrw changes directory; then it is the previous listing. After a
+  -- first :e <dir> or gf it is the directory's own buffer, which would reopen netrw: w:pv_origin is used then.
+  local alt, origin = vim.fn.bufnr("#"), vim.w.pv_origin
+  vim.w.pv_origin = nil
+  if netrw_return_ok(alt) then
+    vim.cmd.buffer(alt)
+  elseif netrw_return_ok(origin) then
+    vim.cmd.buffer(origin)
+  else
+    vim.cmd.enew()
+  end
+end, { desc = "Netrw Toggle" })
 
 -- Move selected lines up and down with J and K
 map("x", "J", ":m '>+1<CR>gv=gv", { desc = "Move Selection Down" })

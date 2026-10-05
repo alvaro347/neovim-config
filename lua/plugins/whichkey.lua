@@ -11,7 +11,7 @@ pack.later(function()
         { "<leader><tab>", group = "tabs" },
         { "<leader>c", group = "code" },
         { "<leader>ci", group = "claude" },
-        { "<leader>d", group = "profiler" },
+        { "<leader>d", group = "debug" },
         { "<leader>dp", group = "profiler" },
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
@@ -40,7 +40,7 @@ pack.later(function()
             return require("which-key.extras").expand.win()
           end,
         },
-        -- better descriptions
+        -- shorter than Neovim's own description of gx
         { "gx", desc = "Open with system app" },
       },
     },

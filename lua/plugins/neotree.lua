@@ -20,6 +20,9 @@ local function setup()
     filesystem = {
       bind_to_cwd = false,
       follow_current_file = { enabled = true },
+      -- directories stay netrw's (<leader>pv, `nvim <dir>`, :e <dir>): the default hijack swaps any buffer named
+      -- after a directory for the tree, netrw's own listing too whenever its window is re-entered
+      hijack_netrw_behavior = "disabled",
       use_libuv_file_watcher = true,
     },
     window = {
@@ -63,10 +66,11 @@ local function setup()
 end
 pack.later(setup)
 
--- `nvim <dir>` opens the tree
+-- `nvim <dir>`: hand neo-tree this config before its own BufEnter autocmd (plugin/neo-tree.lua) sees the
+-- directory, or it would hijack it with its defaults; netrw lists the directory
 vim.api.nvim_create_autocmd("BufEnter", {
   group = vim.api.nvim_create_augroup("Neotree_start_directory", { clear = true }),
-  desc = "Start Neo-tree with directory",
+  desc = "Configure Neo-tree before it sees a directory",
   once = true,
   callback = function()
     if vim.fn.isdirectory(vim.fn.argv(0)) == 1 then
