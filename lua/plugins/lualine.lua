@@ -167,7 +167,6 @@ local trouble_symbols = {
 require("lualine").setup({
   options = {
     theme = statusline_theme, -- a function, so lualine re-derives it on every `:colorscheme`
-    disabled_filetypes = { statusline = { "snacks_dashboard" } },
   },
   sections = {
     lualine_a = { "mode" },
