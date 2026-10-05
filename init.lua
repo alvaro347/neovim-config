@@ -5,6 +5,7 @@
 --   lua/config/keylog.lua       opt-in keymap usage log (runs while stdpath("state")/keylog.enabled exists)
 --   lua/config/keymaps.lua      general keymaps (plugin keymaps live with the plugin)
 --   lua/config/autocmds.lua     autocmds
+--   lua/config/completion.lua   native completion (LSP and buffer words while typing)
 --   lua/config/lsp_servers.lua  LSP servers to enable + their mason packages (used by plugins/mason.lua)
 --   lua/plugins/*.lua           one file per plugin
 --   lua/plugins/themes/*.lua    colorschemes (zenbones is applied below)
@@ -37,3 +38,4 @@ pack.load_dir("plugins")
 
 require("config.keymaps")
 require("config.autocmds")
+require("config.completion")
