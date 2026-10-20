@@ -1,6 +1,6 @@
--- render-markdown: inline markdown rendering, loaded on the first :RenderMarkdown (a bare one turns it on).
--- Needs nvim-treesitter (plugins/treesitter.lua) and mini.icons. Its plugin/ file runs setup() with this
--- table on load; latex is off (no latex parser/converter here).
+-- render-markdown: inline markdown rendering, off until <leader>um or :RenderMarkdown (a bare one turns it
+-- on), which also load it. Needs nvim-treesitter (plugins/treesitter.lua) and mini.icons. Its plugin/ file
+-- runs setup() with this table on load; latex is off (no latex parser/converter here).
 vim.g.render_markdown_config = { enabled = false, latex = { enabled = false } }
 local pack = require("config.pack")
 pack.lazy({ "MeanderingProgrammer/render-markdown.nvim" }, { cmd = "RenderMarkdown" }, function()
@@ -11,3 +11,14 @@ pack.lazy({ "MeanderingProgrammer/render-markdown.nvim" }, { cmd = "RenderMarkdo
     end
   end
 end)
+
+Snacks.toggle({
+  name = "Render Markdown",
+  get = function()
+    return package.loaded["render-markdown"] ~= nil and require("render-markdown").get()
+  end,
+  set = function(state)
+    pack.load("render-markdown.nvim")
+    require("render-markdown").set(state)
+  end,
+}):map("<leader>um")
