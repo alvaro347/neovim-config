@@ -21,6 +21,47 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
+-- Over SSH, also copy clipboard yanks to the machine you type on (OSC 52). The clipboard
+-- provider stays as is (wl-copy in tmux, which only reaches this desktop). In tmux,
+-- `load-buffer -w` passes it to the client terminal, only when that client came in over SSH.
+local ssh_yank = 0
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = augroup("ssh_clipboard"),
+  callback = function()
+    local ev = vim.v.event
+    if ev.regname ~= "+" and not (ev.regname == "" and vim.o.clipboard:find("unnamedplus")) then
+      return
+    end
+    local lines = vim.list_extend({}, ev.regcontents)
+    if ev.regtype == "V" then
+      table.insert(lines, "") -- linewise: end with a newline, as the provider does
+    end
+    if not vim.env.TMUX then
+      if vim.env.SSH_TTY then
+        require("vim.ui.clipboard.osc52").copy("+")(lines)
+      end
+      return
+    end
+    ssh_yank = ssh_yank + 1
+    local seq = ssh_yank
+    vim.system({ "tmux", "display-message", "-p", "#{client_pid} #{client_name}" }, { text = true }, function(out)
+      if seq ~= ssh_yank then
+        return -- a newer yank is on its way; keep the last one
+      end
+      local pid, client = (out.stdout or ""):match("^(%d+) (%S+)")
+      local f = pid and io.open("/proc/" .. pid .. "/environ")
+      if not f then
+        return
+      end
+      local env = "\0" .. f:read("*a")
+      f:close()
+      if env:find("\0SSH_CONNECTION=", 1, true) then
+        vim.system({ "tmux", "load-buffer", "-w", "-t", client, "-" }, { stdin = table.concat(lines, "\n") })
+      end
+    end)
+  end,
+})
+
 -- Equalize splits in every tab when the terminal is resized
 vim.api.nvim_create_autocmd("VimResized", {
   group = augroup("resize_splits"),
