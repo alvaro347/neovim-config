@@ -76,7 +76,7 @@ map("i", ",", ",<c-g>u")
 map("i", ".", ".<c-g>u")
 map("i", ";", ";<c-g>u")
 
--- save file (replaces Neovim's insert-mode <C-s> signature help: <C-k> in LSP buffers, plugins/lsp.lua)
+-- save file (replaces Neovim's insert-mode <C-s> signature help: blink's <C-k>, plugins/blink.lua)
 map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
 
 --keywordprg

@@ -17,7 +17,7 @@ pack.later(function()
         { "<leader>g", group = "git" },
         { "<leader>gh", group = "hunks" },
         { "<leader>p", group = "netrw", mode = "n" },
-        { "<leader>q", group = "quit/session" },
+        { "<leader>q", group = "quit" },
         { "<leader>s", group = "search" },
         { "<leader>u", group = "ui" },
         { "<leader>x", group = "diagnostics/quickfix" },

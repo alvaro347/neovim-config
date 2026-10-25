@@ -23,15 +23,6 @@ require("bufferline").setup({
   },
 })
 
--- Fix bufferline when restoring a session
-vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
-  callback = function()
-    vim.schedule(function()
-      pcall(nvim_bufferline)
-    end)
-  end,
-})
-
 local map = vim.keymap.set
 -- stylua: ignore start
 map("n", "<leader>bp", "<Cmd>BufferLineTogglePin<CR>", { desc = "Toggle Pin" })

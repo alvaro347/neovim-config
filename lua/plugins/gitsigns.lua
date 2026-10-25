@@ -5,21 +5,6 @@ pack.add({ "lewis6991/gitsigns.nvim" })
 -- Set up now: plugin/gitsigns.lua calls setup() at startup anyway, so deferring saved nothing
 -- and left buffers opened at startup racing the deferred on_attach.
 require("gitsigns").setup({
-  signs = {
-    add = { text = "▎" },
-    change = { text = "▎" },
-    delete = { text = "" },
-    topdelete = { text = "" },
-    changedelete = { text = "▎" },
-    untracked = { text = "▎" },
-  },
-  signs_staged = {
-    add = { text = "▎" },
-    change = { text = "▎" },
-    delete = { text = "" },
-    topdelete = { text = "" },
-    changedelete = { text = "▎" },
-  },
   on_attach = function(buffer)
     local gs = package.loaded.gitsigns
 
