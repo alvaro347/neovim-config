@@ -24,7 +24,7 @@ require("snacks").setup({
       vim.b[ctx.buf].matchparen_timeout = 10
       vim.b[ctx.buf].matchparen_insert_timeout = 10
       Snacks.util.wo(0, { foldmethod = "manual", statuscolumn = "", conceallevel = 0 })
-      vim.b[ctx.buf].completion = false -- config/completion.lua
+      vim.b[ctx.buf].completion = false -- blink.cmp
       vim.schedule(function()
         if vim.api.nvim_buf_is_valid(ctx.buf) then
           vim.bo[ctx.buf].syntax = ctx.ft
